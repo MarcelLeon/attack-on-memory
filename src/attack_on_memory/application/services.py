@@ -6,6 +6,7 @@ import hashlib
 import re
 from datetime import timedelta
 
+from attack_on_memory.application.vector_adapter import NoopVectorIndex, VectorIndex
 from attack_on_memory.domain.models import MemoryAtom, RetrievedMemory, RetrievalQuery
 from attack_on_memory.infrastructure.in_memory import InMemoryStore
 
@@ -31,9 +32,17 @@ class CaptureService:
 class RetrievalService:
     """Rule-based retrieval with time-window and graph expansion support."""
 
-    def __init__(self, store: InMemoryStore, graph_bonus: float = 0.15) -> None:
+    def __init__(
+        self,
+        store: InMemoryStore,
+        graph_bonus: float = 0.15,
+        vector_index: VectorIndex | None = None,
+        vector_bonus: float = 0.20,
+    ) -> None:
         self._store = store
         self._graph_bonus = graph_bonus
+        self._vector_index = vector_index or NoopVectorIndex()
+        self._vector_bonus = vector_bonus
 
     def retrieve(self, query: RetrievalQuery) -> list[RetrievedMemory]:
         intent = query.intent
@@ -63,6 +72,31 @@ class RetrievalService:
                             atom=item.atom,
                             score=item.score + self._graph_bonus,
                             reason=f"{item.reason}; graph_neighbor(+{self._graph_bonus:.2f})",
+                        )
+                    )
+                else:
+                    boosted.append(item)
+            scored = boosted
+
+        vector_hits = {
+            hit.atom_id: hit.score
+            for hit in self._vector_index.search(
+                query=query.intent.query,
+                top_k=max(query.top_k, 1),
+            )
+        }
+        if vector_hits:
+            boosted: list[RetrievedMemory] = []
+            for item in scored:
+                if item.atom.id in vector_hits:
+                    boosted.append(
+                        RetrievedMemory(
+                            atom=item.atom,
+                            score=item.score + self._vector_bonus,
+                            reason=(
+                                f"{item.reason}; vector_match={vector_hits[item.atom.id]:.2f}"
+                                f"(+{self._vector_bonus:.2f})"
+                            ),
                         )
                     )
                 else:

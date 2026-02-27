@@ -36,7 +36,21 @@ Use scenario simulation and replay conversion as baseline. A formal replay-drive
 ## 9) Is this production-ready?
 v0.1 is a solid foundation (tests, scenarios, governance, CI), but backends are in-memory and retrieval is rule-based.
 
-## 10) What’s next?
+## 10) Where can I see concrete failure-mode examples?
+- selective disclosure manipulation: `examples/scenarios/case_01_selective_disclosure_manipulation.json`
+- inheritance and role handoff: `examples/scenarios/case_02_scout_inheritance.json`
+- emergency privilege escalation controls: `examples/scenarios/case_03_rumbling_emergency_privilege.json`
+
+## 11) How do I validate those scenarios?
+```bash
+PYTHONPATH=src python3 examples/validate_scenarios.py
+PYTHONPATH=src python3 examples/simulation_runner.py
+```
+
+## 12) What is the operational recommendation for teams?
+Start with scenario-driven governance checks before adding complex vector/graph backends.
+
+## 13) What’s next?
 v0.2 priorities:
 - vector index adapter
 - graph DB adapter

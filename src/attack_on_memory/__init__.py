@@ -6,6 +6,7 @@ from attack_on_memory.application.branch_world_model import (
     BranchWorldModelService,
 )
 from attack_on_memory.application.services import CaptureService, RetrievalService
+from attack_on_memory.application.vector_adapter import NoopVectorIndex, VectorIndex, VectorMatch
 from attack_on_memory.domain.models import (
     Branch,
     BranchStatus,
@@ -70,4 +71,7 @@ __all__ = [
     "TaskIntent",
     "validate_scenario_spec",
     "utc_now",
+    "VectorIndex",
+    "VectorMatch",
+    "NoopVectorIndex",
 ]
