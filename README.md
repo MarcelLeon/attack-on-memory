@@ -1,7 +1,40 @@
 # Attack on Memory / Attack on Agent
 
-> 一个可验证、可治理、可演化的多 Agent 记忆框架。  
-> 它的目标不是“让所有 Agent 共享一切”，而是“让正确的记忆，在正确的时间，以正确的粒度，影响正确的 Agent”。
+> **Memory governance for multi-agent systems**  
+> 让正确的记忆，在正确的时间，以正确的粒度，影响正确的 Agent。
+
+[![CI](https://github.com/MarcelLeon/attack-on-memory/actions/workflows/ci.yml/badge.svg)](https://github.com/MarcelLeon/attack-on-memory/actions/workflows/ci.yml)
+[![Scorecard](https://github.com/MarcelLeon/attack-on-memory/actions/workflows/scorecard.yml/badge.svg)](https://github.com/MarcelLeon/attack-on-memory/actions/workflows/scorecard.yml)
+
+## Why this matters now
+
+大模型 Agent 从“单轮问答”走向“长期协作”后，真正的瓶颈已经不是参数规模，而是：
+- 记忆如何 **可信**（可验证、可回溯）
+- 记忆如何 **可控**（按角色披露、可撤回）
+- 记忆如何 **可演化**（跨版本继承、可回滚）
+
+Attack on Memory 不是另一个 RAG 包装器，而是面向多 Agent 的记忆协议层：
+**Graph Retrieval + Time-window Retrieval + Governance + BranchWorldModel**。
+
+## 3-minute quickstart
+
+```bash
+# 1) run unit tests
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+
+# 2) validate scenario specs
+PYTHONPATH=src python3 examples/validate_scenarios.py
+
+# 3) run simulation demo
+PYTHONPATH=src python3 examples/simulation_runner.py
+```
+
+## Without vs With (expected)
+
+- **Without structured memory**：上下文断裂，重复犯错，越权披露难追踪。
+- **With Attack on Memory**：记忆可寻址、可审计、可按角色投影，且能在分支决策中量化比较。
+
+详见：`docs/experiments-and-value.md`
 
 ## 一、金字塔顶层结论
 如果你理解《进击的巨人》里“道路、继承、记忆影响决策”的机制，你就已经理解了本项目的核心一半。  
@@ -117,3 +150,43 @@
 | `BranchWorldModel` | 显式管理反事实分支 | 多条可能历史/未来路径 | 比较“先扩容”与“先限流”两分支后回注决策 |
 | `Ackerman Class Agent` | 不受“道路记忆注入”影响的独立节点，用于外部校验与抗污染 | 阿克曼血统不受始祖直接改写影响 | 安全审计器/红队/合规模块作为独立真值锚点 |
 | `Eval & Observability` | 证明系统质量变化的指标层 | 非剧情概念 | 监控命中率、污染率、重复错误率 |
+
+## 十、v0.1 已落地内容（文档优先）
+
+### 1) 文档入口
+- 架构与领域模型：`docs/architecture.md`
+- OpenClaw 对接设计：`docs/openclaw-integration.md`
+- 实验与价值验证：`docs/experiments-and-value.md`
+
+### 2) 代码模块
+- 领域模型：`src/attack_on_memory/domain/models.py`
+- 捕获与检索：`src/attack_on_memory/application/services.py`
+- 分支世界模型：`src/attack_on_memory/application/branch_world_model.py`
+- 治理策略：`src/attack_on_memory/governance/policies.py`
+- 运行时上下文：`src/attack_on_memory/runtime/context.py`
+- OpenClaw 适配器：`src/attack_on_memory/runtime/openclaw_adapter.py`
+- 指标观测：`src/attack_on_memory/evals/metrics.py`
+
+### 3) 快速运行
+```bash
+PYTHONPATH=src python examples/openclaw_demo.py
+PYTHONPATH=src python examples/validate_scenarios.py
+PYTHONPATH=src python examples/simulation_runner.py
+PYTHONPATH=src python -m unittest discover -s tests -v
+```
+
+### 4) 对 OpenClaw 的直接价值
+- 在任务开始前，自动注入经过治理后的历史记忆。
+- 在任务结束后，自动回写结果并更新指标闭环。
+- 在分支决策中，能量化比较候选方案并回注主流程。
+- 可把真实运行日志转为 scenario，持续做离线回放和回归验证。
+
+## 十一、工程化与开源发布基线（新增）
+- CI（多 Python 版本）: `.github/workflows/ci.yml`
+- 供应链安全评分（Scorecard）: `.github/workflows/scorecard.yml`
+- 自动依赖更新（Dependabot）: `.github/dependabot.yml`
+- 贡献流程：`CONTRIBUTING.md`、`.github/pull_request_template.md`
+- 社区治理：`CODE_OF_CONDUCT.md`、`SECURITY.md`、`.github/ISSUE_TEMPLATE/*`
+- 企业级评审清单：`docs/ENTERPRISE_REVIEW_CHECKLIST.md`
+- GitHub 爆款发布计划：`docs/GITHUB_LAUNCH_PLAN.md`
+- 本地质量门禁：`make quality-gate`（`scripts/quality_gate.py`）

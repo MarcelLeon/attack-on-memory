@@ -1,0 +1,198 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "case_02_scout_inheritance",
+  "title": "Survey Corps Inheritance: Commander to Armin",
+  "description": "Validate inheritable and referable memory transfer from legacy commander knowledge to new strategist and field executor.",
+  "variants": [
+    {
+      "variant_id": "inheritance_enabled",
+      "description": "Armin and downstream executor inherit validated tactics while outdated memories are filtered.",
+      "policies": [
+        {
+          "role": "strategist",
+          "max_sensitivity": "restricted",
+          "allowed_domains": ["survey-corps"],
+          "allowed_tasks": ["operation-planning"],
+          "min_confidence": 0.75
+        },
+        {
+          "role": "field_executor",
+          "max_sensitivity": "internal",
+          "allowed_domains": ["survey-corps"],
+          "allowed_tasks": ["operation-planning"],
+          "min_confidence": 0.75
+        }
+      ],
+      "memories": [
+        {
+          "id": "mem_erwin_counteroffensive",
+          "claim": "Use split formation with controlled retreat trigger before counteroffensive.",
+          "source_agent": "commander_erwin",
+          "confidence": 0.93,
+          "scope": {
+            "domain": "survey-corps",
+            "task": "operation-planning",
+            "owner": "shared"
+          },
+          "age_days": 12,
+          "ttl_days": 365,
+          "branch_id": "main",
+          "sensitivity": "internal",
+          "tags": ["formation", "retreat", "counteroffensive"],
+          "evidence": [
+            {
+              "ref": "campaign#54",
+              "source": "battle-log",
+              "age_days": 12
+            }
+          ]
+        },
+        {
+          "id": "mem_erwin_retreat_signal",
+          "claim": "Retreat signal must be issued once casualty threshold is reached.",
+          "source_agent": "commander_erwin",
+          "confidence": 0.89,
+          "scope": {
+            "domain": "survey-corps",
+            "task": "operation-planning",
+            "owner": "shared"
+          },
+          "age_days": 8,
+          "ttl_days": 240,
+          "branch_id": "main",
+          "sensitivity": "internal",
+          "tags": ["retreat", "safety"],
+          "evidence": [
+            {
+              "ref": "campaign#58",
+              "source": "battle-log",
+              "age_days": 8
+            }
+          ]
+        },
+        {
+          "id": "mem_cipher_channel",
+          "claim": "High command cipher channel for strategic redirection.",
+          "source_agent": "hq_intel",
+          "confidence": 0.91,
+          "scope": {
+            "domain": "survey-corps",
+            "task": "operation-planning",
+            "owner": "shared"
+          },
+          "age_days": 2,
+          "ttl_days": 60,
+          "branch_id": "main",
+          "sensitivity": "restricted",
+          "tags": ["cipher", "command"],
+          "evidence": [
+            {
+              "ref": "intel#12",
+              "source": "hq-archive",
+              "age_days": 2
+            }
+          ]
+        },
+        {
+          "id": "mem_old_wall_plan",
+          "claim": "Legacy wall defense pattern from obsolete terrain map.",
+          "source_agent": "legacy_manual",
+          "confidence": 0.86,
+          "scope": {
+            "domain": "survey-corps",
+            "task": "operation-planning",
+            "owner": "shared"
+          },
+          "age_days": 320,
+          "ttl_days": 30,
+          "branch_id": "main",
+          "sensitivity": "internal",
+          "tags": ["legacy", "obsolete"],
+          "evidence": [
+            {
+              "ref": "manual#old",
+              "source": "legacy-doc",
+              "age_days": 320
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "source_id": "mem_erwin_counteroffensive",
+          "target_id": "mem_erwin_retreat_signal",
+          "edge_type": "supports"
+        },
+        {
+          "source_id": "mem_erwin_counteroffensive",
+          "target_id": "mem_cipher_channel",
+          "edge_type": "inherited_from"
+        }
+      ],
+      "events": [
+        {
+          "event_id": "armin_planning",
+          "actor": "armin",
+          "role": "strategist",
+          "domain": "survey-corps",
+          "task": "operation-planning",
+          "objective": "Design formation and retreat trigger for the next operation.",
+          "seed_memory_ids": ["mem_erwin_counteroffensive"],
+          "top_k": 5,
+          "lookback_days": 120,
+          "graph_hops": 1,
+          "expected": {
+            "must_include": ["mem_erwin_counteroffensive", "mem_erwin_retreat_signal"],
+            "must_exclude": ["mem_old_wall_plan"],
+            "min_memories": 2
+          },
+          "outcome": {
+            "success": true,
+            "latency_ms": 170.0,
+            "token_cost": 1400.0,
+            "error_signature": null,
+            "conflict": false,
+            "contamination": false
+          }
+        },
+        {
+          "event_id": "squad_execution",
+          "actor": "scout_squad_lead",
+          "role": "field_executor",
+          "domain": "survey-corps",
+          "task": "operation-planning",
+          "objective": "Execute plan with safe retreat timing.",
+          "seed_memory_ids": ["mem_erwin_retreat_signal"],
+          "top_k": 5,
+          "lookback_days": 120,
+          "graph_hops": 1,
+          "expected": {
+            "must_include": ["mem_erwin_counteroffensive"],
+            "must_exclude": ["mem_cipher_channel", "mem_old_wall_plan"],
+            "min_memories": 1
+          },
+          "outcome": {
+            "success": true,
+            "latency_ms": 160.0,
+            "token_cost": 1200.0,
+            "error_signature": null,
+            "conflict": false,
+            "contamination": false
+          }
+        }
+      ],
+      "metric_assertions": [
+        {
+          "metric": "task_success_rate",
+          "op": ">=",
+          "value": 1.0
+        },
+        {
+          "metric": "repeat_error_rate",
+          "op": "<=",
+          "value": 0.0
+        }
+      ]
+    }
+  ]
+}

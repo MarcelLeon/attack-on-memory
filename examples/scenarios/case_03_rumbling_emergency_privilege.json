@@ -1,0 +1,229 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "case_03_rumbling_emergency_privilege",
+  "title": "Rumbling-Grade Emergency Privilege Elevation",
+  "description": "Validate least-privilege in normal mode and controlled elevation with auditability during emergency mode.",
+  "variants": [
+    {
+      "variant_id": "normal_then_emergency",
+      "description": "Normal commander cannot access secret overrides; emergency commander can access them with branch utility checks.",
+      "policies": [
+        {
+          "role": "commander_normal",
+          "max_sensitivity": "restricted",
+          "allowed_domains": ["global-defense"],
+          "allowed_tasks": ["catastrophic-response"],
+          "min_confidence": 0.8
+        },
+        {
+          "role": "commander_emergency",
+          "max_sensitivity": "secret",
+          "allowed_domains": ["global-defense"],
+          "allowed_tasks": ["catastrophic-response"],
+          "min_confidence": 0.8
+        }
+      ],
+      "memories": [
+        {
+          "id": "mem_evac_first",
+          "claim": "Prioritize civilian evacuation corridors before offensive deployment.",
+          "source_agent": "defense_council",
+          "confidence": 0.92,
+          "scope": {
+            "domain": "global-defense",
+            "task": "catastrophic-response",
+            "owner": "shared"
+          },
+          "age_days": 3,
+          "ttl_days": 180,
+          "branch_id": "main",
+          "sensitivity": "internal",
+          "tags": ["evacuation", "civilians"],
+          "evidence": [
+            {
+              "ref": "drill#44",
+              "source": "defense-drill",
+              "age_days": 3
+            }
+          ]
+        },
+        {
+          "id": "mem_civilian_shelter",
+          "claim": "Shelter assignment must be locked before final command activation.",
+          "source_agent": "civil_authority",
+          "confidence": 0.9,
+          "scope": {
+            "domain": "global-defense",
+            "task": "catastrophic-response",
+            "owner": "shared"
+          },
+          "age_days": 1,
+          "ttl_days": 120,
+          "branch_id": "main",
+          "sensitivity": "restricted",
+          "tags": ["shelter", "activation"],
+          "evidence": [
+            {
+              "ref": "civil-plan#8",
+              "source": "civil-protocol",
+              "age_days": 1
+            }
+          ]
+        },
+        {
+          "id": "mem_founder_override_key",
+          "claim": "Founder override key enables emergency titan command channel.",
+          "source_agent": "royal_vault",
+          "confidence": 0.96,
+          "scope": {
+            "domain": "global-defense",
+            "task": "catastrophic-response",
+            "owner": "shared"
+          },
+          "age_days": 0,
+          "ttl_days": 30,
+          "branch_id": "main",
+          "sensitivity": "secret",
+          "tags": ["override", "emergency", "command"],
+          "evidence": [
+            {
+              "ref": "vault#1",
+              "source": "royal-vault",
+              "age_days": 0
+            }
+          ]
+        },
+        {
+          "id": "mem_full_rumbling_order",
+          "claim": "Immediate full-scale rumbling maximizes short-term suppression at extreme risk.",
+          "source_agent": "war_room",
+          "confidence": 0.88,
+          "scope": {
+            "domain": "global-defense",
+            "task": "catastrophic-response",
+            "owner": "shared"
+          },
+          "age_days": 2,
+          "ttl_days": 45,
+          "branch_id": "main",
+          "sensitivity": "secret",
+          "tags": ["rumbling", "high-risk"],
+          "evidence": [
+            {
+              "ref": "war-sim#7",
+              "source": "war-room",
+              "age_days": 2
+            }
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "source_id": "mem_evac_first",
+          "target_id": "mem_civilian_shelter",
+          "edge_type": "supports"
+        },
+        {
+          "source_id": "mem_full_rumbling_order",
+          "target_id": "mem_evac_first",
+          "edge_type": "contradicts"
+        }
+      ],
+      "branches": [
+        {
+          "id": "evac_first",
+          "name": "Evacuate then targeted defense",
+          "hypothesis": "Lower collateral damage with stable long-term control.",
+          "parent_id": "main",
+          "status": "active"
+        },
+        {
+          "id": "full_rumbling",
+          "name": "Immediate full rumbling",
+          "hypothesis": "Maximum short-term pressure with systemic fallout.",
+          "parent_id": "main",
+          "status": "active"
+        }
+      ],
+      "branch_evaluations": [
+        {
+          "branch_id": "evac_first",
+          "success_rate": 0.83,
+          "risk_score": 0.24,
+          "cost_score": 0.31
+        },
+        {
+          "branch_id": "full_rumbling",
+          "success_rate": 0.88,
+          "risk_score": 0.92,
+          "cost_score": 0.85
+        }
+      ],
+      "expected_top_branch": "evac_first",
+      "events": [
+        {
+          "event_id": "pre_authorization_planning",
+          "actor": "eren_control_room",
+          "role": "commander_normal",
+          "domain": "global-defense",
+          "task": "catastrophic-response",
+          "objective": "Prepare response plan and protect civilians before emergency authorization.",
+          "seed_memory_ids": ["mem_evac_first"],
+          "top_k": 6,
+          "lookback_days": 90,
+          "graph_hops": 1,
+          "expected": {
+            "must_include": ["mem_evac_first", "mem_civilian_shelter"],
+            "must_exclude": ["mem_founder_override_key", "mem_full_rumbling_order"],
+            "min_memories": 2,
+            "min_redacted": 1
+          },
+          "outcome": {
+            "success": true,
+            "latency_ms": 220.0,
+            "token_cost": 2100.0,
+            "error_signature": null,
+            "conflict": false,
+            "contamination": false
+          }
+        },
+        {
+          "event_id": "emergency_authorized",
+          "actor": "eren_control_room",
+          "role": "commander_emergency",
+          "domain": "global-defense",
+          "task": "catastrophic-response",
+          "objective": "Emergency authorized. Use override key with civilian protection constraints.",
+          "seed_memory_ids": ["mem_founder_override_key"],
+          "top_k": 6,
+          "lookback_days": 90,
+          "graph_hops": 1,
+          "expected": {
+            "must_include": ["mem_founder_override_key", "mem_evac_first"],
+            "min_memories": 3
+          },
+          "outcome": {
+            "success": true,
+            "latency_ms": 250.0,
+            "token_cost": 2600.0,
+            "error_signature": null,
+            "conflict": false,
+            "contamination": false
+          }
+        }
+      ],
+      "metric_assertions": [
+        {
+          "metric": "task_success_rate",
+          "op": ">=",
+          "value": 1.0
+        },
+        {
+          "metric": "hit_rate",
+          "op": ">=",
+          "value": 1.0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://attack-on-memory.dev/scenario.schema.json",
+  "title": "Attack on Memory Scenario Spec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scenario_id", "variants"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "variants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/variant"
+      }
+    }
+  },
+  "$defs": {
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "max_sensitivity",
+        "allowed_domains",
+        "allowed_tasks",
+        "min_confidence"
+      ],
+      "properties": {
+        "role": { "type": "string", "minLength": 1 },
+        "max_sensitivity": {
+          "type": "string",
+          "enum": ["public", "internal", "restricted", "secret"]
+        },
+        "allowed_domains": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "allowed_tasks": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "min_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domain", "task"],
+      "properties": {
+        "domain": { "type": "string", "minLength": 1 },
+        "task": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "source", "age_days"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "age_days": { "type": "number", "minimum": 0 },
+        "note": { "type": "string" }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "claim",
+        "source_agent",
+        "confidence",
+        "scope",
+        "age_days",
+        "ttl_days",
+        "sensitivity",
+        "evidence"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "claim": { "type": "string", "minLength": 1 },
+        "source_agent": { "type": "string", "minLength": 1 },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "scope": { "$ref": "#/$defs/scope" },
+        "age_days": { "type": "number", "minimum": 0 },
+        "ttl_days": { "type": "number", "exclusiveMinimum": 0 },
+        "branch_id": { "type": "string" },
+        "sensitivity": {
+          "type": "string",
+          "enum": ["public", "internal", "restricted", "secret"]
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidence" }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "target_id", "edge_type"],
+      "properties": {
+        "source_id": { "type": "string", "minLength": 1 },
+        "target_id": { "type": "string", "minLength": 1 },
+        "edge_type": {
+          "type": "string",
+          "enum": [
+            "supports",
+            "contradicts",
+            "derived_from",
+            "inherited_from",
+            "caused_by"
+          ]
+        },
+        "weight": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "must_include": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "must_exclude": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "must_have_citation": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "must_not_cite": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "min_memories": { "type": "number", "minimum": 0 },
+        "max_memories": { "type": "number", "minimum": 0 },
+        "min_redacted": { "type": "number", "minimum": 0 },
+        "max_redacted": { "type": "number", "minimum": 0 }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "success",
+        "latency_ms",
+        "token_cost",
+        "conflict",
+        "contamination"
+      ],
+      "properties": {
+        "success": { "type": "boolean" },
+        "latency_ms": { "type": "number", "minimum": 0 },
+        "token_cost": { "type": "number", "minimum": 0 },
+        "error_signature": {
+          "type": ["string", "null"]
+        },
+        "conflict": { "type": "boolean" },
+        "contamination": { "type": "boolean" }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "actor",
+        "role",
+        "domain",
+        "task",
+        "objective",
+        "top_k",
+        "graph_hops"
+      ],
+      "properties": {
+        "event_id": { "type": "string", "minLength": 1 },
+        "actor": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "domain": { "type": "string", "minLength": 1 },
+        "task": { "type": "string", "minLength": 1 },
+        "objective": { "type": "string", "minLength": 1 },
+        "branch_id": { "type": "string" },
+        "seed_memory_ids": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "top_k": { "type": "number", "minimum": 1 },
+        "lookback_days": { "type": ["number", "null"] },
+        "graph_hops": { "type": "number", "minimum": 0 },
+        "expected": { "$ref": "#/$defs/expected" },
+        "outcome": { "$ref": "#/$defs/outcome" }
+      }
+    },
+    "branch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "hypothesis", "status"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "hypothesis": { "type": "string", "minLength": 1 },
+        "parent_id": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["active", "merged", "rejected", "archived"]
+        }
+      }
+    },
+    "branch_evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["branch_id", "success_rate", "risk_score", "cost_score"],
+      "properties": {
+        "branch_id": { "type": "string", "minLength": 1 },
+        "success_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "risk_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cost_score": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "metric_assertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metric", "op", "value"],
+      "properties": {
+        "metric": {
+          "type": "string",
+          "enum": [
+            "hit_rate",
+            "task_success_rate",
+            "repeat_error_rate",
+            "conflict_rate",
+            "contamination_rate",
+            "avg_latency_ms",
+            "avg_token_cost"
+          ]
+        },
+        "op": {
+          "type": "string",
+          "enum": ["==", "!=", ">", ">=", "<", "<="]
+        },
+        "value": { "type": "number" }
+      }
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["variant_id", "policies", "memories", "events"],
+      "properties": {
+        "variant_id": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "policies": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/policy" }
+        },
+        "memories": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/memory" }
+        },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/edge" }
+        },
+        "branches": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/branch" }
+        },
+        "branch_evaluations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/branch_evaluation" }
+        },
+        "expected_top_branch": { "type": "string" },
+        "risk_weight": { "type": "number", "minimum": 0 },
+        "cost_weight": { "type": "number", "minimum": 0 },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/event" }
+        },
+        "metric_assertions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/metric_assertion" }
+        }
+      }
+    }
+  }
+}
