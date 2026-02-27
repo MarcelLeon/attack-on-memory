@@ -2,20 +2,19 @@
 
 from __future__ import annotations
 
-from collections import defaultdict, deque
 from typing import Iterable
 
 from attack_on_memory.domain.models import Branch, BranchStatus, EdgeType, MemoryAtom, MemoryEdge
+from attack_on_memory.infrastructure.graph_backend import GraphBackend, InMemoryGraphBackend
 
 
 class InMemoryStore:
     """Single in-memory store implementing memory, graph, and branch repositories."""
 
-    def __init__(self) -> None:
+    def __init__(self, graph_backend: GraphBackend | None = None) -> None:
         self._atoms: dict[str, MemoryAtom] = {}
         self._edges: list[MemoryEdge] = []
-        self._outgoing: dict[str, list[MemoryEdge]] = defaultdict(list)
-        self._incoming: dict[str, list[MemoryEdge]] = defaultdict(list)
+        self._graph_backend = graph_backend or InMemoryGraphBackend()
         self._branches: dict[str, Branch] = {}
 
     # Memory atom operations
@@ -36,8 +35,7 @@ class InMemoryStore:
         if edge.source_id not in self._atoms or edge.target_id not in self._atoms:
             raise KeyError("Both source and target atoms must exist before adding an edge")
         self._edges.append(edge)
-        self._outgoing[edge.source_id].append(edge)
-        self._incoming[edge.target_id].append(edge)
+        self._graph_backend.add_edge(edge)
 
     def list_edges(
         self,
@@ -63,30 +61,11 @@ class InMemoryStore:
         max_hops: int = 1,
         edge_types: set[EdgeType] | None = None,
     ) -> set[str]:
-        if max_hops <= 0:
-            return set()
-
-        visited: set[str] = set()
-        queue: deque[tuple[str, int]] = deque((seed_id, 0) for seed_id in seed_ids)
-
-        while queue:
-            current_id, hops = queue.popleft()
-            if current_id in visited:
-                continue
-            visited.add(current_id)
-            if hops >= max_hops:
-                continue
-
-            outgoing_edges = self._outgoing.get(current_id, [])
-            incoming_edges = self._incoming.get(current_id, [])
-            for edge in outgoing_edges + incoming_edges:
-                if edge_types is not None and edge.edge_type not in edge_types:
-                    continue
-                neighbor_id = edge.target_id if edge.source_id == current_id else edge.source_id
-                if neighbor_id not in visited:
-                    queue.append((neighbor_id, hops + 1))
-
-        return visited - set(seed_ids)
+        return self._graph_backend.neighboring_atom_ids(
+            seed_ids,
+            max_hops=max_hops,
+            edge_types=edge_types,
+        )
 
     # Branch operations
     def upsert_branch(self, branch: Branch) -> None:
