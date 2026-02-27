@@ -188,5 +188,5 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 - 贡献流程：`CONTRIBUTING.md`、`.github/pull_request_template.md`
 - 社区治理：`CODE_OF_CONDUCT.md`、`SECURITY.md`、`.github/ISSUE_TEMPLATE/*`
 - 企业级评审清单：`docs/ENTERPRISE_REVIEW_CHECKLIST.md`
-- GitHub 爆款发布计划：`docs/GITHUB_LAUNCH_PLAN.md`
+- 常见问题：`docs/FAQ.md`
 - 本地质量门禁：`make quality-gate`（`scripts/quality_gate.py`）
