@@ -23,3 +23,4 @@ We will acknowledge within 72 hours and provide remediation timelines.
 - CI required before merge
 - Dependabot enabled
 - OSSF Scorecard workflow enabled
+- Threat model draft: `docs/threat-model.md`
