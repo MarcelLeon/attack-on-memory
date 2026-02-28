@@ -191,4 +191,6 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 - 威胁模型：`docs/threat-model.md`
 - 基准报告（初版）：`docs/benchmarks/v0.1-baseline.md`
 - 常见问题：`docs/FAQ.md`
+- 首次贡献指南：`docs/STARTER_PR_WALKTHROUGH.md`
+- 48小时冲刺看板：`docs/SPRINT_48H_EXECUTION.md`
 - 本地质量门禁：`make quality-gate`（`scripts/quality_gate.py`）
