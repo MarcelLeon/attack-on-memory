@@ -15,7 +15,8 @@ Within 48 hours, improve discovery, trust, and contribution conversion for the p
 - [x] B1. FAQ baseline
 - [x] B2. Threat model draft
 - [x] B3. Benchmark baseline template + initial doc
-- [ ] B4. Add benchmark update #1 (real replay-derived numbers)
+- [x] B4. Add benchmark snapshot #1 (scenario-derived reproducible numbers)
+- [ ] B5. Add benchmark snapshot #2 (replay-derived numbers)
 
 ## Track C — Contribution Conversion
 - [x] C1. Contributing / Security / Code of Conduct / templates

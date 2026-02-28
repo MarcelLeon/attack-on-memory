@@ -190,6 +190,7 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 - 企业级评审清单：`docs/ENTERPRISE_REVIEW_CHECKLIST.md`
 - 威胁模型：`docs/threat-model.md`
 - 基准报告（初版）：`docs/benchmarks/v0.1-baseline.md`
+- 基准快照（可复现）：`docs/benchmarks/v0.1-benchmark-snapshot.md`
 - 常见问题：`docs/FAQ.md`
 - 首次贡献指南：`docs/STARTER_PR_WALKTHROUGH.md`
 - 48小时冲刺看板：`docs/SPRINT_48H_EXECUTION.md`

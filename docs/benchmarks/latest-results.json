@@ -1,0 +1,173 @@
+[
+  {
+    "scenario_id": "case_01_selective_disclosure_manipulation",
+    "variant_id": "baseline_permissive",
+    "passed": true,
+    "events": [
+      {
+        "event_id": "grisha_decision",
+        "passed": true,
+        "memory_ids": [
+          "mem_attack_order",
+          "mem_patient_ethic",
+          "mem_royal_safety_rule"
+        ],
+        "citation_ids": [
+          "mem_attack_order",
+          "mem_patient_ethic",
+          "mem_royal_safety_rule"
+        ],
+        "redacted": 0,
+        "failures": []
+      }
+    ],
+    "metric_snapshot": {
+      "hit_rate": 1.0,
+      "task_success_rate": 0.0,
+      "repeat_error_rate": 0.0,
+      "conflict_rate": 1.0,
+      "contamination_rate": 1.0,
+      "avg_latency_ms": 210.0,
+      "avg_token_cost": 1800.0
+    },
+    "branch_ranks": [],
+    "failures": []
+  },
+  {
+    "scenario_id": "case_01_selective_disclosure_manipulation",
+    "variant_id": "guarded_selective_disclosure",
+    "passed": true,
+    "events": [
+      {
+        "event_id": "grisha_decision",
+        "passed": true,
+        "memory_ids": [
+          "mem_patient_ethic"
+        ],
+        "citation_ids": [
+          "mem_patient_ethic"
+        ],
+        "redacted": 2,
+        "failures": []
+      }
+    ],
+    "metric_snapshot": {
+      "hit_rate": 1.0,
+      "task_success_rate": 1.0,
+      "repeat_error_rate": 0.0,
+      "conflict_rate": 0.0,
+      "contamination_rate": 0.0,
+      "avg_latency_ms": 190.0,
+      "avg_token_cost": 1650.0
+    },
+    "branch_ranks": [],
+    "failures": []
+  },
+  {
+    "scenario_id": "case_02_scout_inheritance",
+    "variant_id": "inheritance_enabled",
+    "passed": true,
+    "events": [
+      {
+        "event_id": "armin_planning",
+        "passed": true,
+        "memory_ids": [
+          "mem_cipher_channel",
+          "mem_erwin_counteroffensive",
+          "mem_erwin_retreat_signal"
+        ],
+        "citation_ids": [
+          "mem_cipher_channel",
+          "mem_erwin_counteroffensive",
+          "mem_erwin_retreat_signal"
+        ],
+        "redacted": 0,
+        "failures": []
+      },
+      {
+        "event_id": "squad_execution",
+        "passed": true,
+        "memory_ids": [
+          "mem_erwin_counteroffensive",
+          "mem_erwin_retreat_signal"
+        ],
+        "citation_ids": [
+          "mem_erwin_counteroffensive",
+          "mem_erwin_retreat_signal"
+        ],
+        "redacted": 1,
+        "failures": []
+      }
+    ],
+    "metric_snapshot": {
+      "hit_rate": 1.0,
+      "task_success_rate": 1.0,
+      "repeat_error_rate": 0.0,
+      "conflict_rate": 0.0,
+      "contamination_rate": 0.0,
+      "avg_latency_ms": 165.0,
+      "avg_token_cost": 1300.0
+    },
+    "branch_ranks": [],
+    "failures": []
+  },
+  {
+    "scenario_id": "case_03_rumbling_emergency_privilege",
+    "variant_id": "normal_then_emergency",
+    "passed": true,
+    "events": [
+      {
+        "event_id": "pre_authorization_planning",
+        "passed": true,
+        "memory_ids": [
+          "mem_civilian_shelter",
+          "mem_evac_first"
+        ],
+        "citation_ids": [
+          "mem_civilian_shelter",
+          "mem_evac_first"
+        ],
+        "redacted": 2,
+        "failures": []
+      },
+      {
+        "event_id": "emergency_authorized",
+        "passed": true,
+        "memory_ids": [
+          "mem_civilian_shelter",
+          "mem_evac_first",
+          "mem_founder_override_key",
+          "mem_full_rumbling_order"
+        ],
+        "citation_ids": [
+          "mem_civilian_shelter",
+          "mem_evac_first",
+          "mem_founder_override_key",
+          "mem_full_rumbling_order"
+        ],
+        "redacted": 0,
+        "failures": []
+      }
+    ],
+    "metric_snapshot": {
+      "hit_rate": 1.0,
+      "task_success_rate": 1.0,
+      "repeat_error_rate": 0.0,
+      "conflict_rate": 0.0,
+      "contamination_rate": 0.0,
+      "avg_latency_ms": 235.0,
+      "avg_token_cost": 2350.0
+    },
+    "branch_ranks": [
+      {
+        "branch_id": "evac_first",
+        "utility": 0.7354999999999999
+      },
+      {
+        "branch_id": "full_rumbling",
+        "utility": 0.5685
+      }
+    ],
+    "failures": []
+  }
+]
