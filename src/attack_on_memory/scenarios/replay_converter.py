@@ -143,6 +143,7 @@ def _normalize_record(record: dict[str, Any], *, index: int) -> dict[str, Any]:
     domain = _first_str(record, "domain") or "unknown-domain"
     task = _first_str(record, "task") or "unknown-task"
     objective = _first_str(record, "objective", "query", "prompt") or "replay objective"
+    purpose = _first_str(record, "purpose")
     branch_id = _first_str(record, "branch_id") or "main"
 
     seed_memory_ids = _to_str_list(record.get("seed_memory_ids", []))
@@ -168,6 +169,7 @@ def _normalize_record(record: dict[str, Any], *, index: int) -> dict[str, Any]:
         "domain": domain,
         "task": task,
         "objective": objective,
+        "purpose": purpose,
         "branch_id": branch_id,
         "seed_memory_ids": seed_memory_ids,
         "top_k": int(record.get("top_k", 5) or 5),
@@ -294,6 +296,8 @@ def _build_event_spec(
         "graph_hops": event["graph_hops"],
         "outcome": event["outcome"],
     }
+    if event["purpose"] is not None:
+        payload["purpose"] = event["purpose"]
     if expected:
         payload["expected"] = expected
     return payload

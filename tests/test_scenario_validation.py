@@ -34,6 +34,22 @@ class ScenarioValidationTests(unittest.TestCase):
         errors = validate_scenario_spec(broken)
         self.assertTrue(any("role 'ghost_role' has no matching policy" in err for err in errors))
 
+    def test_purpose_bound_scenario_is_valid(self) -> None:
+        case_path = (
+            Path(__file__).resolve().parents[1]
+            / "examples"
+            / "scenarios"
+            / "case_04_purpose_bound_disclosure.json"
+        )
+        spec = json.loads(case_path.read_text(encoding="utf-8"))
+        self.assertEqual(validate_scenario_spec(spec), [])
+
+    def test_policy_version_must_be_positive_integer(self) -> None:
+        broken = copy.deepcopy(self.spec)
+        broken["variants"][0]["policies"][0]["version"] = 1.5
+        errors = validate_scenario_spec(broken)
+        self.assertTrue(any("version must be an integer >= 1" in err for err in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

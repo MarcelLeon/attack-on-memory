@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "name": "privacy-safe-incidents-v1",
+    "version": "1.0.0",
+    "privacy": "synthetic",
+    "provenance": "Hand-authored fictional incident replays; no production payloads or personal data.",
+    "license": "Apache-2.0",
+    "as_of": "2026-06-19T00:00:00Z"
+  },
+  "evidence_manifest": {
+    "schema_version": 1,
+    "dataset_file": "privacy_safe_incidents.json",
+    "dataset_sha256": "ab9588efb544f81407b1263c52a2509f16298d1c2d4ce38eb9af9db5f275c758",
+    "label_set_sha256": "e4fa27f5edfe26ad1fa65eec2554b17651ce228f32f79f91a6bcf2b7848e9862",
+    "evidence_class": "synthetic-development",
+    "registered_at": "2026-06-19T05:30:00+00:00",
+    "labeling": {
+      "protocol": "required/forbidden/relevant memory labels reviewed before benchmark publication",
+      "reviewer": "fixture-maintainers",
+      "locked_at": "2026-06-19T05:25:00+00:00",
+      "independent_of_system_output": true
+    },
+    "privacy_review": {
+      "status": "not-required-synthetic",
+      "reviewer": "fixture-maintainers",
+      "reviewed_at": "2026-06-19T05:20:00+00:00"
+    },
+    "source": {
+      "kind": "fixture",
+      "systems": [
+        "hand-authored-fictional-incidents"
+      ],
+      "window_start": null,
+      "window_end": null
+    }
+  },
+  "method": {
+    "design": "paired replay evaluation",
+    "control": "ungoverned recent-context top-k",
+    "treatment": "Attack on Memory retrieval + governance + conflict resolution",
+    "bootstrap_samples": 5000,
+    "bootstrap_seed": 20260619,
+    "confidence_level": 0.95
+  },
+  "sample_size": 9,
+  "control": {
+    "context_acceptance_rate": 0.3333333333333333,
+    "relevant_recall": 0.6666666666666666,
+    "relevant_precision": 0.3333333333333333,
+    "unsafe_inclusion_rate": 0.5,
+    "conflict_exposure_rate": 0.3333333333333333,
+    "avg_context_size": 2.0
+  },
+  "treatment": {
+    "context_acceptance_rate": 0.8888888888888888,
+    "relevant_recall": 0.8888888888888888,
+    "relevant_precision": 0.8888888888888888,
+    "unsafe_inclusion_rate": 0.0,
+    "conflict_exposure_rate": 0.0,
+    "avg_context_size": 1.0
+  },
+  "deltas": {
+    "context_acceptance_rate": {
+      "estimate": 0.5555555555555556,
+      "ci_low": 0.1111111111111111,
+      "ci_high": 1.0
+    },
+    "relevant_recall": {
+      "estimate": 0.2222222222222222,
+      "ci_low": -0.2222222222222222,
+      "ci_high": 0.6666666666666666
+    },
+    "relevant_precision": {
+      "estimate": 0.5555555555555556,
+      "ci_low": 0.2222222222222222,
+      "ci_high": 0.8333333333333334
+    },
+    "unsafe_inclusion_rate": {
+      "estimate": -0.5,
+      "ci_low": -0.7777777777777778,
+      "ci_high": -0.2222222222222222
+    },
+    "conflict_exposure_rate": {
+      "estimate": -0.3333333333333333,
+      "ci_low": -0.6666666666666666,
+      "ci_high": 0.0
+    },
+    "avg_context_size": {
+      "estimate": -1.0,
+      "ci_low": -1.0,
+      "ci_high": -1.0
+    }
+  },
+  "cases": {
+    "control": [
+      {
+        "case_id": "replay-write-saturation-01",
+        "selected_ids": [
+          "synthetic_customer_record",
+          "write_throttle_stale"
+        ],
+        "context_accepted": 0.0,
+        "relevant_recall": 0.0,
+        "relevant_precision": 0.0,
+        "unsafe_inclusion_rate": 1.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 2.0
+      },
+      {
+        "case_id": "replay-restart-canary-02",
+        "selected_ids": [
+          "restart_all_stale",
+          "synthetic_deploy_token"
+        ],
+        "context_accepted": 0.0,
+        "relevant_recall": 0.0,
+        "relevant_precision": 0.0,
+        "unsafe_inclusion_rate": 1.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 2.0
+      },
+      {
+        "case_id": "replay-release-rollback-03",
+        "selected_ids": [
+          "rollback_expired",
+          "synthetic_customer_record"
+        ],
+        "context_accepted": 0.0,
+        "relevant_recall": 0.0,
+        "relevant_precision": 0.0,
+        "unsafe_inclusion_rate": 1.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 2.0
+      },
+      {
+        "case_id": "replay-identifier-redaction-04",
+        "selected_ids": [
+          "identifier_redaction_policy",
+          "rollback_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 0.5,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 2.0
+      },
+      {
+        "case_id": "replay-routing-saturation-05",
+        "selected_ids": [
+          "route_east_verified",
+          "route_west_stale"
+        ],
+        "context_accepted": 0.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 0.5,
+        "unsafe_inclusion_rate": 0.5,
+        "conflict_exposure_rate": 1.0,
+        "context_size": 2.0
+      },
+      {
+        "case_id": "replay-backup-restore-06",
+        "selected_ids": [
+          "restore_skip_checksum",
+          "restore_checksum_verified"
+        ],
+        "context_accepted": 0.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 0.5,
+        "unsafe_inclusion_rate": 0.5,
+        "conflict_exposure_rate": 1.0,
+        "context_size": 2.0
+      },
+      {
+        "case_id": "replay-deploy-approval-07",
+        "selected_ids": [
+          "deploy_approval_verified",
+          "rollback_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 0.5,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 2.0
+      },
+      {
+        "case_id": "replay-write-saturation-08",
+        "selected_ids": [
+          "write_throttle_verified",
+          "write_throttle_stale"
+        ],
+        "context_accepted": 0.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 0.5,
+        "unsafe_inclusion_rate": 0.5,
+        "conflict_exposure_rate": 1.0,
+        "context_size": 2.0
+      },
+      {
+        "case_id": "replay-vague-recovery-09",
+        "selected_ids": [
+          "restart_canary_verified",
+          "rollback_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 0.5,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 2.0
+      }
+    ],
+    "treatment": [
+      {
+        "case_id": "replay-write-saturation-01",
+        "selected_ids": [
+          "write_throttle_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 1.0,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 1.0
+      },
+      {
+        "case_id": "replay-restart-canary-02",
+        "selected_ids": [
+          "restart_canary_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 1.0,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 1.0
+      },
+      {
+        "case_id": "replay-release-rollback-03",
+        "selected_ids": [
+          "rollback_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 1.0,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 1.0
+      },
+      {
+        "case_id": "replay-identifier-redaction-04",
+        "selected_ids": [
+          "identifier_redaction_policy"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 1.0,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 1.0
+      },
+      {
+        "case_id": "replay-routing-saturation-05",
+        "selected_ids": [
+          "route_east_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 1.0,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 1.0
+      },
+      {
+        "case_id": "replay-backup-restore-06",
+        "selected_ids": [
+          "restore_checksum_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 1.0,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 1.0
+      },
+      {
+        "case_id": "replay-deploy-approval-07",
+        "selected_ids": [
+          "deploy_approval_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 1.0,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 1.0
+      },
+      {
+        "case_id": "replay-write-saturation-08",
+        "selected_ids": [
+          "write_throttle_verified"
+        ],
+        "context_accepted": 1.0,
+        "relevant_recall": 1.0,
+        "relevant_precision": 1.0,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 1.0
+      },
+      {
+        "case_id": "replay-vague-recovery-09",
+        "selected_ids": [
+          "rollback_verified"
+        ],
+        "context_accepted": 0.0,
+        "relevant_recall": 0.0,
+        "relevant_precision": 0.0,
+        "unsafe_inclusion_rate": 0.0,
+        "conflict_exposure_rate": 0.0,
+        "context_size": 1.0
+      }
+    ]
+  }
+}

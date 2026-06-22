@@ -1,4 +1,4 @@
-# Threat Model (v0.1 draft)
+# Threat Model (v0.2)
 
 ## Scope
 Attack on Memory memory protocol components:
@@ -26,11 +26,13 @@ Attack on Memory memory protocol components:
 ### 1) Memory poisoning
 **Vector:** adversarial or low-quality claims are captured and later retrieved as if trustworthy.
 
-**Mitigations (v0.1):**
+**Mitigations:**
 - atom confidence field
 - evidence references required
 - ttl/lookback filters
 - scenario validation and replay-based testing
+- fail-closed quarantine with immutable, content-minimized lifecycle events
+- derivation-neighborhood quarantine for contamination recovery
 
 **Gaps:**
 - no cryptographic provenance
@@ -39,19 +41,21 @@ Attack on Memory memory protocol components:
 ### 2) Over-disclosure / data leakage
 **Vector:** sensitive atoms exposed to roles that should only receive summarized projections.
 
-**Mitigations (v0.1):**
+**Mitigations:**
 - sensitivity levels
 - role-based selective disclosure policy
+- explicit purpose binding for sensitive workflows
+- versioned allow/deny reason codes in a separate audit plane
 - auditable citations in runtime packet
 
 **Gaps:**
 - policy misconfiguration risk
-- no policy simulation dashboard yet
+- no static policy lint or what-if simulation yet
 
 ### 3) Privilege fusion
 **Vector:** combining high-level planning and high-sensitivity read paths into effectively unrestricted authority.
 
-**Mitigations (v0.1):**
+**Mitigations:**
 - role-scoped governance checks
 - scenario tests modeling emergency and manipulation cases
 
@@ -61,13 +65,27 @@ Attack on Memory memory protocol components:
 ### 4) Stale or contradictory memory use
 **Vector:** expired or conflicting atoms influence decisions.
 
-**Mitigations (v0.1):**
+**Mitigations:**
 - TTL and lookback filtering
 - contradiction/support graph edges
 - conflict metrics
+- evidence-aware select-or-quarantine conflict resolution
+- explicit consolidation and TTL expiry lifecycle states
 
 **Gaps:**
-- no automatic conflict resolution strategy learning yet
+- resolution weights are not calibrated on execution-derived incidents yet
+
+### 5) Incomplete erasure
+**Vector:** deleting one representation leaves claims, evidence, graph edges, or vectors recoverable elsewhere.
+
+**Mitigations:**
+- transactional erasure of atom content with graph/vector cascade
+- terminal `forgotten` state prevents accidental recapture under the same id
+- content-minimized lifecycle event retains only opaque id, reason code, actor, time, and version
+
+**Gaps:**
+- external vector services and backups need adapter-specific erasure attestations
+- jurisdiction-specific retention requirements are not yet qualified
 
 ## Abuse Cases
 - Malicious operator injects fabricated evidence links.

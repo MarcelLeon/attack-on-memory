@@ -13,6 +13,7 @@ authors = [{ name = "Attack on Memory Contributors" }]
 
 [project.optional-dependencies]
 graph = ["networkx>=3.0"]
+provenance = ["cryptography>=42.0"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

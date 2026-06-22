@@ -10,6 +10,8 @@
       "policies": [
         {
           "role": "strategist",
+          "policy_id": "case02-strategist",
+          "version": 1,
           "max_sensitivity": "restricted",
           "allowed_domains": ["survey-corps"],
           "allowed_tasks": ["operation-planning"],
@@ -17,10 +19,27 @@
         },
         {
           "role": "field_executor",
+          "policy_id": "case02-field-executor",
+          "version": 1,
           "max_sensitivity": "internal",
           "allowed_domains": ["survey-corps"],
           "allowed_tasks": ["operation-planning"],
           "min_confidence": 0.75
+        }
+      ],
+      "branches": [
+        {
+          "id": "main",
+          "name": "Commander Baseline",
+          "hypothesis": "Retain Erwin's validated baseline tactics.",
+          "status": "active"
+        },
+        {
+          "id": "armin_counterfactual",
+          "name": "Armin Counterfactual",
+          "hypothesis": "Keep Erwin's formation but tighten retreat trigger with fresh terrain intel.",
+          "parent_id": "main",
+          "status": "active"
         }
       ],
       "memories": [
@@ -62,6 +81,9 @@
           "branch_id": "main",
           "sensitivity": "internal",
           "tags": ["retreat", "safety"],
+          "metadata": {
+            "memory_key": "retreat_trigger"
+          },
           "evidence": [
             {
               "ref": "campaign#58",
@@ -115,6 +137,32 @@
               "age_days": 320
             }
           ]
+        },
+        {
+          "id": "mem_armin_retreat_window",
+          "claim": "Retreat signal must wait for flare confirmation that the fallback corridor is still open.",
+          "source_agent": "armin",
+          "confidence": 0.95,
+          "scope": {
+            "domain": "survey-corps",
+            "task": "operation-planning",
+            "owner": "shared"
+          },
+          "age_days": 1,
+          "ttl_days": 120,
+          "branch_id": "armin_counterfactual",
+          "sensitivity": "internal",
+          "tags": ["retreat", "fallback", "corridor"],
+          "metadata": {
+            "memory_key": "retreat_trigger"
+          },
+          "evidence": [
+            {
+              "ref": "intel#88",
+              "source": "terrain-scout",
+              "age_days": 1
+            }
+          ]
         }
       ],
       "edges": [
@@ -137,14 +185,16 @@
           "domain": "survey-corps",
           "task": "operation-planning",
           "objective": "Design formation and retreat trigger for the next operation.",
+          "branch_id": "armin_counterfactual",
           "seed_memory_ids": ["mem_erwin_counteroffensive"],
           "top_k": 5,
           "lookback_days": 120,
           "graph_hops": 1,
           "expected": {
-            "must_include": ["mem_erwin_counteroffensive", "mem_erwin_retreat_signal"],
-            "must_exclude": ["mem_old_wall_plan"],
-            "min_memories": 2
+            "must_include": ["mem_erwin_counteroffensive", "mem_armin_retreat_window"],
+            "must_exclude": ["mem_old_wall_plan", "mem_erwin_retreat_signal"],
+            "min_memories": 2,
+            "min_inherited": 1
           },
           "outcome": {
             "success": true,
@@ -162,14 +212,16 @@
           "domain": "survey-corps",
           "task": "operation-planning",
           "objective": "Execute plan with safe retreat timing.",
-          "seed_memory_ids": ["mem_erwin_retreat_signal"],
+          "branch_id": "armin_counterfactual",
+          "seed_memory_ids": ["mem_armin_retreat_window"],
           "top_k": 5,
           "lookback_days": 120,
           "graph_hops": 1,
           "expected": {
-            "must_include": ["mem_erwin_counteroffensive"],
-            "must_exclude": ["mem_cipher_channel", "mem_old_wall_plan"],
-            "min_memories": 1
+            "must_include": ["mem_erwin_counteroffensive", "mem_armin_retreat_window"],
+            "must_exclude": ["mem_cipher_channel", "mem_old_wall_plan", "mem_erwin_retreat_signal"],
+            "min_memories": 2,
+            "min_inherited": 1
           },
           "outcome": {
             "success": true,

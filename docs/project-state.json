@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-06-22",
+  "goal": "把本项目做成业界领先的记忆体系，并时刻了解自己的目标和交付成果。",
+  "north_star": {
+    "metric": "governed_context_acceptance_rate",
+    "definition": "Share of labeled replay contexts containing every required memory, no forbidden memory, and no exposed contradiction.",
+    "target": ">= 0.80 on replay-derived evaluation, with scenario pass rate = 1.00",
+    "evidence_command": "make north-star (live) and make replay-benchmark (auditable artifact)"
+  },
+  "current_milestone": {
+    "id": "M1",
+    "title": "Trustworthy memory kernel",
+    "outcome": "A durable, replay-evaluated memory kernel that governs branch-aware context and resolves conflicts with auditable evidence.",
+    "deliverable_ids": ["D003", "D004", "D005", "D006", "D009"]
+  },
+  "deliverables": [
+    {
+      "id": "D001",
+      "title": "Typed memory atoms, evidence, scope, TTL, and citations",
+      "status": "done",
+      "evidence": [
+        "src/attack_on_memory/domain/models.py",
+        "src/attack_on_memory/runtime/context.py",
+        "tests/test_retrieval_and_governance.py"
+      ],
+      "next_action": "Preserve invariants while storage adapters evolve."
+    },
+    {
+      "id": "D002",
+      "title": "Role-aware selective disclosure and runtime governance",
+      "status": "done",
+      "evidence": [
+        "src/attack_on_memory/governance/policies.py",
+        "examples/scenarios/case_01_selective_disclosure_manipulation.json",
+        "examples/scenarios/case_04_purpose_bound_disclosure.json"
+      ],
+      "next_action": "Exercise policy what-if and signed audit export in the target rollout pipeline."
+    },
+    {
+      "id": "D003",
+      "title": "Branch inheritance, child override, and conflict diagnostics",
+      "status": "done",
+      "evidence": [
+        "src/attack_on_memory/application/services.py",
+        "examples/scenarios/case_02_scout_inheritance.json",
+        "tests/test_retrieval_and_governance.py"
+      ],
+      "next_action": "Use these semantics as the contract for persistent stores."
+    },
+    {
+      "id": "D004",
+      "title": "Replay-derived comparative evaluation with confidence intervals",
+      "status": "in_progress",
+      "evidence": [
+        "src/attack_on_memory/scenarios/replay_converter.py",
+        "src/attack_on_memory/evals/replay_benchmark.py",
+        "examples/replays/privacy_safe_incidents.json",
+        "examples/replays/privacy_safe_incidents.manifest.json",
+        "docs/benchmarks/replay-v0.2-report.md",
+        "docs/benchmarks/replay-v0.2-results.json",
+        "docs/replay-evidence.md"
+      ],
+      "next_action": "Collect privacy-approved sanitized execution replays under the manifest protocol and rerun the paired confidence intervals beyond the synthetic fixture."
+    },
+    {
+      "id": "D005",
+      "title": "Durable storage with graph and vector adapter parity",
+      "status": "done",
+      "evidence": [
+        "src/attack_on_memory/infrastructure/store.py",
+        "src/attack_on_memory/infrastructure/sqlite_store.py",
+        "src/attack_on_memory/infrastructure/hashing_embedder.py",
+        "src/attack_on_memory/infrastructure/graph_backend.py",
+        "src/attack_on_memory/application/vector_adapter.py",
+        "tests/test_store_contract.py"
+      ],
+      "next_action": "Run the executable runtime qualification profile with the selected production embedding provider."
+    },
+    {
+      "id": "D006",
+      "title": "Evidence-aware automatic conflict resolution",
+      "status": "done",
+      "evidence": [
+        "src/attack_on_memory/application/conflict_resolution.py",
+        "src/attack_on_memory/runtime/context.py",
+        "tests/test_conflict_resolution.py"
+      ],
+      "next_action": "Calibrate authority weights against replay-derived outcomes."
+    },
+    {
+      "id": "D007",
+      "title": "Consolidation, forgetting, deletion, and poisoning recovery",
+      "status": "done",
+      "evidence": [
+        "src/attack_on_memory/application/lifecycle.py",
+        "src/attack_on_memory/domain/models.py",
+        "src/attack_on_memory/infrastructure/sqlite_store.py",
+        "tests/test_memory_lifecycle.py",
+        "docs/threat-model.md"
+      ],
+      "next_action": "Qualify propagation policies against execution-derived poisoning incidents and external deletion requirements."
+    },
+    {
+      "id": "D008",
+      "title": "Production-scale reliability qualification",
+      "status": "in_progress",
+      "evidence": [
+        "src/attack_on_memory/infrastructure/sqlite_store.py",
+        "src/attack_on_memory/infrastructure/http_embedder.py",
+        "src/attack_on_memory/evals/runtime_qualification.py",
+        "scripts/qualify_runtime.py",
+        "tests/test_store_contract.py",
+        "tests/test_http_embedder.py",
+        "tests/test_runtime_qualification.py",
+        "docs/runtime-qualification.md",
+        "docs/benchmarks/runtime-development-v0.1.json",
+        "docs/storage-operations.md"
+      ],
+      "next_action": "Run the executable qualification gate with the selected semantic model and retention evidence in the target production environment."
+    },
+    {
+      "id": "D009",
+      "title": "Purpose-bound, explainable, versioned governance audit",
+      "status": "done",
+      "evidence": [
+        "src/attack_on_memory/governance/policies.py",
+        "src/attack_on_memory/governance/audit.py",
+        "src/attack_on_memory/runtime/context.py",
+        "src/attack_on_memory/infrastructure/sqlite_store.py",
+        "examples/scenarios/case_04_purpose_bound_disclosure.json",
+        "tests/test_governance_audit.py"
+      ],
+      "next_action": "Connect signed audit export to production key custody and immutable retention."
+    },
+    {
+      "id": "D010",
+      "title": "Policy linting and permission-expansion what-if gate",
+      "status": "done",
+      "evidence": [
+        "src/attack_on_memory/governance/analysis.py",
+        "src/attack_on_memory/governance/policies.py",
+        "scripts/policy_check.py",
+        "tests/test_policy_analysis.py",
+        "docs/policy-governance.md"
+      ],
+      "next_action": "Feed execution-derived audit samples into the what-if gate before every production policy rollout."
+    },
+    {
+      "id": "D011",
+      "title": "Tamper-evident signed governance audit export",
+      "status": "done",
+      "evidence": [
+        "src/attack_on_memory/governance/signed_audit.py",
+        "scripts/audit_bundle.py",
+        "tests/test_signed_audit.py",
+        "docs/signed-audit.md"
+      ],
+      "next_action": "Integrate KMS/HSM custody, WORM storage, key revocation, and external timestamping in the target environment."
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "Provenance and citations",
+      "status": "done",
+      "next_gate": "Signed or externally verifiable evidence references"
+    },
+    {
+      "name": "Temporal validity and scoped retrieval",
+      "status": "done",
+      "next_gate": "Bi-temporal history and retroactive corrections"
+    },
+    {
+      "name": "Branch-aware world models",
+      "status": "done",
+      "next_gate": "Persistent-backend semantic parity"
+    },
+    {
+      "name": "Policy-governed context",
+      "status": "done",
+      "next_gate": "KMS/HSM custody, WORM retention, revocation, and production rollout integration"
+    },
+    {
+      "name": "Conflict handling",
+      "status": "done",
+      "next_gate": "Calibrated resolution thresholds and human-review queue integration"
+    },
+    {
+      "name": "Evaluation and observability",
+      "status": "in_progress",
+      "next_gate": "Manifest-bound sanitized execution replay with paired uncertainty bounds"
+    },
+    {
+      "name": "Durability and scale",
+      "status": "in_progress",
+      "next_gate": "A passing target-production qualification report with semantic-model and retention evidence"
+    },
+    {
+      "name": "Memory lifecycle and anti-poisoning",
+      "status": "done",
+      "next_gate": "Execution-derived poisoning drills and jurisdiction-specific erasure qualification"
+    }
+  ]
+}

@@ -4,7 +4,15 @@ import unittest
 from datetime import timedelta
 
 from attack_on_memory.application.services import CaptureService, RetrievalService
-from attack_on_memory.domain.models import Evidence, MemoryAtom, MemoryScope, Sensitivity, utc_now
+from attack_on_memory.domain.models import (
+    EdgeType,
+    Evidence,
+    MemoryAtom,
+    MemoryEdge,
+    MemoryScope,
+    Sensitivity,
+    utc_now,
+)
 from attack_on_memory.evals.metrics import EvalTracker
 from attack_on_memory.governance.policies import DisclosurePolicy, MemoryGovernor
 from attack_on_memory.infrastructure.in_memory import InMemoryStore
@@ -50,6 +58,25 @@ class OpenClawAdapterTests(unittest.TestCase):
             sensitivity=Sensitivity.INTERNAL,
         )
         capture.capture(atom)
+        contradictory = MemoryAtom(
+            id="mem_incident_conflict",
+            claim="故障处理期间不要限流，直接扩容。",
+            evidence=(Evidence(ref="incident#67", source="review", captured_at=now),),
+            source_agent="reviewer",
+            confidence=0.82,
+            scope=MemoryScope(domain="operations", task="incident-response"),
+            created_at=now - timedelta(hours=12),
+            ttl=timedelta(days=45),
+            sensitivity=Sensitivity.INTERNAL,
+        )
+        capture.capture(contradictory)
+        self.store.add_edge(
+            MemoryEdge(
+                source_id="mem_incident_plan",
+                target_id="mem_incident_conflict",
+                edge_type=EdgeType.CONTRADICTS,
+            )
+        )
 
     def test_context_build_and_metrics(self) -> None:
         event = OpenClawTaskEvent(
@@ -64,6 +91,7 @@ class OpenClawAdapterTests(unittest.TestCase):
         context = self.adapter.build_context(event, top_k=3, lookback_days=30)
         self.assertEqual(context.request_id, "task-1")
         self.assertGreaterEqual(len(context.memories), 1)
+        self.assertGreaterEqual(context.diagnostics["contradictions"], 1)
 
         self.adapter.record_outcome(
             success=False,

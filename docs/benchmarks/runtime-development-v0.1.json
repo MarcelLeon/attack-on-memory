@@ -1,0 +1,76 @@
+{
+  "backup_retention_evidence": null,
+  "checks_passed": true,
+  "claim_scope": "non-production-evidence",
+  "environment": "development",
+  "generated_at": "2026-06-19T05:09:36.103957+00:00",
+  "production_claim_eligible": false,
+  "profile_id": "codex-sandbox-local",
+  "runtime": {
+    "implementation": "CPython",
+    "machine": "arm64",
+    "python": "3.12.13",
+    "release": "25.2.0",
+    "sqlite": "3.50.4",
+    "system": "Darwin"
+  },
+  "schema_version": 1,
+  "semantic_embedding": {
+    "reason": "No semantic provider and probe set were supplied.",
+    "status": "not_run"
+  },
+  "storage": {
+    "backup_sha256": "dd112e96e05509a70ad34ef08fb82c2f5c37eab29e5be6d4583555465dd589b0",
+    "checks": [
+      {"name": "all_writes_committed", "observed": 500, "operator": "==", "passed": true, "threshold": 500},
+      {"name": "write_rate", "observed": 11692.749800574305, "operator": ">=", "passed": true, "threshold": 100.0},
+      {"name": "write_p95", "observed": 0.071375, "operator": "<=", "passed": true, "threshold": 100.0},
+      {"name": "read_rate", "observed": 140755.85896262934, "operator": ">=", "passed": true, "threshold": 1000.0},
+      {"name": "read_p95", "observed": 0.007917, "operator": "<=", "passed": true, "threshold": 20.0},
+      {"name": "backup_restore_time", "observed": 0.004324083, "operator": "<=", "passed": true, "threshold": 30.0},
+      {"name": "live_integrity_count", "observed": 500, "operator": "==", "passed": true, "threshold": 500},
+      {"name": "restored_integrity_count", "observed": 500, "operator": "==", "passed": true, "threshold": 500}
+    ],
+    "failures": [],
+    "live_integrity": {
+      "atoms": 500,
+      "branches": 0,
+      "edges": 0,
+      "governance_decisions": 0,
+      "lifecycle_events": 0,
+      "schema_version": 4,
+      "vectors": 0
+    },
+    "metrics": {
+      "backup_restore_seconds": 0.004324083,
+      "committed_writes": 500,
+      "read_ops_per_second": 140755.85896262934,
+      "read_p50_ms": 0.006208,
+      "read_p95_ms": 0.007917,
+      "reads": 500,
+      "write_ops_per_second": 11692.749800574305,
+      "write_p50_ms": 0.047541,
+      "write_p95_ms": 0.071375
+    },
+    "restored_integrity": {
+      "atoms": 500,
+      "branches": 0,
+      "edges": 0,
+      "governance_decisions": 0,
+      "lifecycle_events": 0,
+      "schema_version": 4,
+      "vectors": 0
+    },
+    "status": "pass"
+  },
+  "thresholds": {
+    "max_backup_restore_seconds": 30.0,
+    "max_embedding_p95_ms": 1000.0,
+    "max_read_p95_ms": 20.0,
+    "max_write_p95_ms": 100.0,
+    "min_read_ops_per_second": 1000.0,
+    "min_semantic_margin": 0.1,
+    "min_write_ops_per_second": 100.0
+  },
+  "workload": {"sample_count": 500, "writer_count": 4}
+}

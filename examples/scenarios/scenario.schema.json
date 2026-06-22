@@ -41,6 +41,8 @@
       ],
       "properties": {
         "role": { "type": "string", "minLength": 1 },
+        "policy_id": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 1 },
         "max_sensitivity": {
           "type": "string",
           "enum": ["public", "internal", "restricted", "secret"]
@@ -55,6 +57,11 @@
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 }
         },
+        "allowed_purposes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "require_explicit_purpose": { "type": "boolean" },
         "min_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
       }
     },
@@ -163,7 +170,11 @@
         "min_memories": { "type": "number", "minimum": 0 },
         "max_memories": { "type": "number", "minimum": 0 },
         "min_redacted": { "type": "number", "minimum": 0 },
-        "max_redacted": { "type": "number", "minimum": 0 }
+        "max_redacted": { "type": "number", "minimum": 0 },
+        "min_inherited": { "type": "number", "minimum": 0 },
+        "max_inherited": { "type": "number", "minimum": 0 },
+        "min_contradictions": { "type": "number", "minimum": 0 },
+        "max_contradictions": { "type": "number", "minimum": 0 }
       }
     },
     "outcome": {
@@ -207,6 +218,7 @@
         "domain": { "type": "string", "minLength": 1 },
         "task": { "type": "string", "minLength": 1 },
         "objective": { "type": "string", "minLength": 1 },
+        "purpose": { "type": "string", "minLength": 1 },
         "branch_id": { "type": "string" },
         "seed_memory_ids": {
           "type": "array",

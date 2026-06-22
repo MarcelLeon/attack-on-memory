@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from attack_on_memory.application.services import CaptureService, RetrievalService
 from attack_on_memory.domain.models import (
+    Branch,
     EdgeType,
     Evidence,
     MemoryAtom,
@@ -130,6 +131,141 @@ class RetrievalAndGovernanceTests(unittest.TestCase):
         self.assertIn("mem_fresh_internal", projected_ids)
         self.assertNotIn("mem_restricted", projected_ids)
         self.assertTrue(all(citation.atom_id != "mem_restricted" for citation in citations))
+
+    def test_branch_inheritance_prefers_child_override(self) -> None:
+        now = utc_now()
+        self.store.upsert_branch(
+            Branch(
+                id="main",
+                name="Main",
+                hypothesis="stable baseline",
+                created_at=now,
+            )
+        )
+        self.store.upsert_branch(
+            Branch(
+                id="branch_armin",
+                name="Armin",
+                hypothesis="refine retreat timing",
+                parent_id="main",
+                created_at=now,
+            )
+        )
+
+        inherited_main = MemoryAtom(
+            id="mem_main_signal",
+            claim="Retreat after first smoke signal.",
+            evidence=(Evidence(ref="plan#1", source="manual", captured_at=now),),
+            source_agent="commander",
+            confidence=0.70,
+            scope=MemoryScope(domain="operations", task="incident-response"),
+            created_at=now - timedelta(days=5),
+            ttl=timedelta(days=90),
+            branch_id="main",
+            tags=("retreat",),
+            metadata={"memory_key": "retreat_signal"},
+        )
+        branch_override = MemoryAtom(
+            id="mem_branch_signal",
+            claim="Retreat only after confirming corridor stability.",
+            evidence=(Evidence(ref="plan#2", source="review", captured_at=now),),
+            source_agent="armin",
+            confidence=0.92,
+            scope=MemoryScope(domain="operations", task="incident-response"),
+            created_at=now - timedelta(hours=12),
+            ttl=timedelta(days=90),
+            branch_id="branch_armin",
+            tags=("retreat", "stability"),
+            metadata={"memory_key": "retreat_signal"},
+        )
+        inherited_support = MemoryAtom(
+            id="mem_main_corridor",
+            claim="Keep the north corridor clear for fallback.",
+            evidence=(Evidence(ref="plan#3", source="manual", captured_at=now),),
+            source_agent="commander",
+            confidence=0.85,
+            scope=MemoryScope(domain="operations", task="incident-response"),
+            created_at=now - timedelta(days=3),
+            ttl=timedelta(days=90),
+            branch_id="main",
+            tags=("corridor", "fallback"),
+        )
+
+        self.capture.capture(inherited_main)
+        self.capture.capture(branch_override)
+        self.capture.capture(inherited_support)
+
+        intent = TaskIntent(
+            request_id="req-branch",
+            actor="openclaw",
+            role="planner",
+            domain="operations",
+            task="incident-response",
+            query="Retreat timing and fallback corridor",
+            branch_id="branch_armin",
+            as_of=now,
+        )
+        results = self.retrieval.retrieve(
+            RetrievalQuery(intent=intent, top_k=10, lookback=timedelta(days=30))
+        )
+
+        atom_ids = [item.atom.id for item in results]
+        self.assertIn("mem_branch_signal", atom_ids)
+        self.assertIn("mem_main_corridor", atom_ids)
+        self.assertNotIn("mem_main_signal", atom_ids)
+        support_reason = next(item.reason for item in results if item.atom.id == "mem_main_corridor")
+        self.assertIn("inherited_from=main", support_reason)
+
+    def test_contradiction_penalty_marks_conflicting_memories(self) -> None:
+        now = utc_now()
+        conflict_a = MemoryAtom(
+            id="mem_conflict_a",
+            claim="Throttle writes before restart.",
+            evidence=(Evidence(ref="plan#a", source="playbook", captured_at=now),),
+            source_agent="planner",
+            confidence=0.83,
+            scope=MemoryScope(domain="operations", task="incident-response"),
+            created_at=now - timedelta(hours=3),
+            ttl=timedelta(days=30),
+            tags=("throttle", "restart"),
+        )
+        conflict_b = MemoryAtom(
+            id="mem_conflict_b",
+            claim="Do not throttle writes before restart.",
+            evidence=(Evidence(ref="plan#b", source="review", captured_at=now),),
+            source_agent="reviewer",
+            confidence=0.81,
+            scope=MemoryScope(domain="operations", task="incident-response"),
+            created_at=now - timedelta(hours=2),
+            ttl=timedelta(days=30),
+            tags=("throttle", "restart"),
+        )
+        self.capture.capture(conflict_a)
+        self.capture.capture(conflict_b)
+        self.store.add_edge(
+            MemoryEdge(
+                source_id="mem_conflict_a",
+                target_id="mem_conflict_b",
+                edge_type=EdgeType.CONTRADICTS,
+            )
+        )
+
+        intent = TaskIntent(
+            request_id="req-conflict",
+            actor="openclaw",
+            role="planner",
+            domain="operations",
+            task="incident-response",
+            query="Should we throttle writes before restart?",
+            as_of=now,
+        )
+        results = self.retrieval.retrieve(
+            RetrievalQuery(intent=intent, top_k=10, lookback=timedelta(days=30))
+        )
+
+        flagged = [item for item in results if item.atom.id in {"mem_conflict_a", "mem_conflict_b"}]
+        self.assertEqual(len(flagged), 2)
+        self.assertTrue(all("contradiction_risk=" in item.reason for item in flagged))
 
 
 if __name__ == "__main__":

@@ -14,6 +14,9 @@ class GraphBackend(Protocol):
     def add_edge(self, edge: MemoryEdge) -> None:
         ...
 
+    def remove_atom(self, atom_id: str) -> None:
+        ...
+
     def neighboring_atom_ids(
         self,
         seed_ids: Iterable[str],
@@ -34,6 +37,14 @@ class InMemoryGraphBackend:
     def add_edge(self, edge: MemoryEdge) -> None:
         self._outgoing[edge.source_id].append(edge)
         self._incoming[edge.target_id].append(edge)
+
+    def remove_atom(self, atom_id: str) -> None:
+        self._outgoing.pop(atom_id, None)
+        self._incoming.pop(atom_id, None)
+        for edges in self._outgoing.values():
+            edges[:] = [edge for edge in edges if edge.target_id != atom_id]
+        for edges in self._incoming.values():
+            edges[:] = [edge for edge in edges if edge.source_id != atom_id]
 
     def neighboring_atom_ids(
         self,
@@ -91,6 +102,10 @@ class NetworkXGraphBackend:
             edge_type=edge.edge_type.value,
             weight=edge.weight,
         )
+
+    def remove_atom(self, atom_id: str) -> None:
+        if atom_id in self._graph:
+            self._graph.remove_node(atom_id)
 
     def neighboring_atom_ids(
         self,

@@ -17,6 +17,8 @@
 
 ## 3. 关键指标（与代码一致）
 
+- `governed_context_acceptance_rate`：北极星指标；带人工标签的 replay 上，必需记忆齐全、禁用记忆为零且没有暴露矛盾的上下文比例。
+- `governed_safe_projection_rate`：无 relevance 标签的场景安全代理，表示候选记忆中经策略允许且未标记冲突的投影比例；它不冒充“有用性”。
 - `hit_rate`: 检索命中率。
 - `task_success_rate`: 任务成功率。
 - `repeat_error_rate`: 重复错误率。
@@ -25,7 +27,8 @@
 - `avg_latency_ms`: 平均延迟。
 - `avg_token_cost`: 平均 token 成本。
 
-指标实现见 `src/attack_on_memory/evals/metrics.py`。
+运行期指标实现见 `src/attack_on_memory/evals/metrics.py`。
+场景安全代理实现见 `src/attack_on_memory/evals/north_star.py`，带标签的北极星实现见 `src/attack_on_memory/evals/replay_benchmark.py`。
 
 ## 4. 现实应用交互（如何体现价值）
 

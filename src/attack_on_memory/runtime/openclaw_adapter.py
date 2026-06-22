@@ -21,6 +21,7 @@ class OpenClawTaskEvent:
     domain: str
     task: str
     objective: str
+    purpose: str | None = None
     branch_id: str = "main"
     seed_memory_ids: tuple[str, ...] = ()
 
@@ -32,6 +33,7 @@ class OpenClawTaskEvent:
             domain=self.domain,
             task=self.task,
             query=self.objective,
+            purpose=self.purpose,
             branch_id=self.branch_id,
             as_of=at or utc_now(),
         )

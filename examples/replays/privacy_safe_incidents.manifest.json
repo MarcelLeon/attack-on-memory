@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "dataset_file": "privacy_safe_incidents.json",
+  "dataset_sha256": "ab9588efb544f81407b1263c52a2509f16298d1c2d4ce38eb9af9db5f275c758",
+  "label_set_sha256": "e4fa27f5edfe26ad1fa65eec2554b17651ce228f32f79f91a6bcf2b7848e9862",
+  "evidence_class": "synthetic-development",
+  "registered_at": "2026-06-19T05:30:00+00:00",
+  "labeling": {
+    "protocol": "required/forbidden/relevant memory labels reviewed before benchmark publication",
+    "reviewer": "fixture-maintainers",
+    "locked_at": "2026-06-19T05:25:00+00:00",
+    "independent_of_system_output": true
+  },
+  "privacy_review": {
+    "status": "not-required-synthetic",
+    "reviewer": "fixture-maintainers",
+    "reviewed_at": "2026-06-19T05:20:00+00:00"
+  },
+  "source": {
+    "kind": "fixture",
+    "systems": ["hand-authored-fictional-incidents"],
+    "window_start": null,
+    "window_end": null
+  }
+}

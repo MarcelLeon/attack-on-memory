@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "case_04_purpose_bound_disclosure",
+  "title": "Purpose-bound disclosure and audit",
+  "description": "A valid role must still declare an allowed purpose before operational memory is projected.",
+  "variants": [
+    {
+      "variant_id": "purpose_binding_enforced",
+      "description": "Missing and unrelated purposes fail closed; the approved purpose succeeds.",
+      "policies": [
+        {
+          "role": "incident_executor",
+          "policy_id": "ops-purpose-policy",
+          "version": 3,
+          "max_sensitivity": "internal",
+          "allowed_domains": ["operations"],
+          "allowed_tasks": ["incident-response"],
+          "allowed_purposes": ["incident-mitigation"],
+          "require_explicit_purpose": true,
+          "min_confidence": 0.8
+        }
+      ],
+      "memories": [
+        {
+          "id": "mem_recovery_switch",
+          "claim": "Enable the verified recovery switch during incident mitigation.",
+          "source_agent": "reliability-reviewer",
+          "confidence": 0.96,
+          "scope": {
+            "domain": "operations",
+            "task": "incident-response",
+            "owner": "shared"
+          },
+          "age_days": 1,
+          "ttl_days": 30,
+          "branch_id": "main",
+          "sensitivity": "internal",
+          "tags": ["recovery", "switch", "incident"],
+          "evidence": [
+            {
+              "ref": "runbook:recovery-switch:v3",
+              "source": "signed-runbook",
+              "age_days": 1
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "event_id": "purpose_missing",
+          "actor": "field_worker",
+          "role": "incident_executor",
+          "domain": "operations",
+          "task": "incident-response",
+          "objective": "Use the recovery switch",
+          "branch_id": "main",
+          "seed_memory_ids": [],
+          "top_k": 5,
+          "lookback_days": 30,
+          "graph_hops": 0,
+          "expected": {
+            "must_exclude": ["mem_recovery_switch"],
+            "max_memories": 0,
+            "min_redacted": 1
+          },
+          "outcome": {
+            "success": true,
+            "latency_ms": 12,
+            "token_cost": 40,
+            "error_signature": null,
+            "conflict": false,
+            "contamination": false
+          }
+        },
+        {
+          "event_id": "purpose_unrelated",
+          "actor": "field_worker",
+          "role": "incident_executor",
+          "domain": "operations",
+          "task": "incident-response",
+          "objective": "Use the recovery switch",
+          "purpose": "analytics-training",
+          "branch_id": "main",
+          "seed_memory_ids": [],
+          "top_k": 5,
+          "lookback_days": 30,
+          "graph_hops": 0,
+          "expected": {
+            "must_exclude": ["mem_recovery_switch"],
+            "max_memories": 0,
+            "min_redacted": 1
+          },
+          "outcome": {
+            "success": true,
+            "latency_ms": 12,
+            "token_cost": 40,
+            "error_signature": null,
+            "conflict": false,
+            "contamination": false
+          }
+        },
+        {
+          "event_id": "purpose_approved",
+          "actor": "field_worker",
+          "role": "incident_executor",
+          "domain": "operations",
+          "task": "incident-response",
+          "objective": "Use the recovery switch",
+          "purpose": "incident-mitigation",
+          "branch_id": "main",
+          "seed_memory_ids": [],
+          "top_k": 5,
+          "lookback_days": 30,
+          "graph_hops": 0,
+          "expected": {
+            "must_include": ["mem_recovery_switch"],
+            "must_have_citation": ["mem_recovery_switch"],
+            "min_memories": 1,
+            "max_redacted": 0
+          },
+          "outcome": {
+            "success": true,
+            "latency_ms": 14,
+            "token_cost": 55,
+            "error_signature": null,
+            "conflict": false,
+            "contamination": false
+          }
+        }
+      ],
+      "metric_assertions": [
+        {"metric": "task_success_rate", "op": "==", "value": 1.0}
+      ]
+    }
+  ]
+}

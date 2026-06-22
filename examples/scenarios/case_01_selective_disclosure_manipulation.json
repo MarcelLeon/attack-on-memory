@@ -10,6 +10,8 @@
       "policies": [
         {
           "role": "executor",
+          "policy_id": "case01-baseline-executor",
+          "version": 1,
           "max_sensitivity": "secret",
           "allowed_domains": ["founding-operation"],
           "allowed_tasks": ["royal-contact"],
@@ -140,6 +142,8 @@
       "policies": [
         {
           "role": "executor",
+          "policy_id": "case01-guarded-executor",
+          "version": 1,
           "max_sensitivity": "internal",
           "allowed_domains": ["founding-operation"],
           "allowed_tasks": ["royal-contact"],

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from attack_on_memory.domain.models import Branch, BranchStatus, utc_now
-from attack_on_memory.infrastructure.in_memory import InMemoryStore
+from attack_on_memory.infrastructure.store import MemoryStore
 
 
 @dataclass(frozen=True)
@@ -36,7 +36,7 @@ class BranchRank:
 class BranchWorldModelService:
     """Manage branch lifecycle and utility-based ranking."""
 
-    def __init__(self, store: InMemoryStore) -> None:
+    def __init__(self, store: MemoryStore) -> None:
         self._store = store
 
     def create_branch(

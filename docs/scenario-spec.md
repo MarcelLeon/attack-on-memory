@@ -31,6 +31,7 @@
 - edge 引用的 `source_id/target_id` 必须存在于 memories。
 - `metric_assertions.metric` 必须在系统指标白名单内。
 - `confidence/success_rate/risk_score/cost_score` 范围必须在 `[0,1]`。
+- policy 可声明 `policy_id/version/allowed_purposes/require_explicit_purpose`；event 用 `purpose` 验证目的绑定与默认拒绝行为。
 
 ## 5. 回放转场景
 

@@ -40,6 +40,7 @@ class EventResult:
     memory_ids: list[str] = field(default_factory=list)
     citation_ids: list[str] = field(default_factory=list)
     redacted: int = 0
+    diagnostics: dict[str, int] = field(default_factory=dict)
     failures: list[str] = field(default_factory=list)
 
 
@@ -67,9 +68,15 @@ def _build_adapter(
         governor.register_policy(
             DisclosurePolicy(
                 role=raw_policy["role"],
+                policy_id=raw_policy.get("policy_id", "scenario-disclosure"),
+                version=int(raw_policy.get("version", 1)),
                 max_sensitivity=Sensitivity(raw_policy.get("max_sensitivity", "internal")),
                 allowed_domains=frozenset(raw_policy.get("allowed_domains", [])),
                 allowed_tasks=frozenset(raw_policy.get("allowed_tasks", [])),
+                allowed_purposes=frozenset(raw_policy.get("allowed_purposes", [])),
+                require_explicit_purpose=bool(
+                    raw_policy.get("require_explicit_purpose", False)
+                ),
                 min_confidence=float(raw_policy.get("min_confidence", 0.0)),
             )
         )
@@ -164,6 +171,7 @@ def _evaluate_event(packet, expected: dict[str, Any]) -> EventResult:
     citation_ids = sorted(citation.atom_id for citation in packet.citations)
     memory_set = set(memory_ids)
     citation_set = set(citation_ids)
+    diagnostics = dict(packet.diagnostics)
     failures: list[str] = []
 
     for atom_id in expected.get("must_include", []):
@@ -203,12 +211,35 @@ def _evaluate_event(packet, expected: dict[str, Any]) -> EventResult:
     if max_redacted is not None and redacted > int(max_redacted):
         failures.append(f"expected redacted <= {int(max_redacted)}, got {redacted}")
 
+    inherited = int(diagnostics.get("inherited", 0))
+    min_inherited = expected.get("min_inherited")
+    if min_inherited is not None and inherited < int(min_inherited):
+        failures.append(f"expected inherited >= {int(min_inherited)}, got {inherited}")
+
+    max_inherited = expected.get("max_inherited")
+    if max_inherited is not None and inherited > int(max_inherited):
+        failures.append(f"expected inherited <= {int(max_inherited)}, got {inherited}")
+
+    contradictions = int(diagnostics.get("contradictions", 0))
+    min_contradictions = expected.get("min_contradictions")
+    if min_contradictions is not None and contradictions < int(min_contradictions):
+        failures.append(
+            f"expected contradictions >= {int(min_contradictions)}, got {contradictions}"
+        )
+
+    max_contradictions = expected.get("max_contradictions")
+    if max_contradictions is not None and contradictions > int(max_contradictions):
+        failures.append(
+            f"expected contradictions <= {int(max_contradictions)}, got {contradictions}"
+        )
+
     return EventResult(
         event_id=packet.request_id,
         passed=not failures,
         memory_ids=memory_ids,
         citation_ids=citation_ids,
         redacted=redacted,
+        diagnostics=diagnostics,
         failures=failures,
     )
 
@@ -278,6 +309,7 @@ def _run_variant(scenario_id: str, variant: dict[str, Any]) -> VariantResult:
             domain=raw_event["domain"],
             task=raw_event["task"],
             objective=raw_event["objective"],
+            purpose=raw_event.get("purpose"),
             branch_id=raw_event.get("branch_id", "main"),
             seed_memory_ids=tuple(raw_event.get("seed_memory_ids", [])),
         )
@@ -367,7 +399,8 @@ def _print_results(results: list[VariantResult]) -> None:
             print(
                 "  "
                 f"- {event.event_id}: {event_status} "
-                f"memories={event.memory_ids} redacted={event.redacted}"
+                f"memories={event.memory_ids} redacted={event.redacted} "
+                f"diagnostics={event.diagnostics}"
             )
             if event.failures:
                 for failure in event.failures:
@@ -401,6 +434,7 @@ def _write_json_output(results: list[VariantResult], output_path: Path) -> None:
                     "memory_ids": event.memory_ids,
                     "citation_ids": event.citation_ids,
                     "redacted": event.redacted,
+                    "diagnostics": event.diagnostics,
                     "failures": event.failures,
                 }
                 for event in item.event_results

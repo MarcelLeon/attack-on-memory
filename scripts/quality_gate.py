@@ -5,10 +5,11 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 
 
 def run(cmd: list[str]) -> None:
-    print(f"\n$ {' '.join(cmd)}")
+    print(f"\n$ {' '.join(cmd)}", flush=True)
     env = dict(os.environ)
     src = str((__file__))
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(src)))
@@ -17,9 +18,15 @@ def run(cmd: list[str]) -> None:
 
 
 def main() -> int:
-    run(["python3", "-m", "unittest", "discover", "-s", "tests", "-v"])
-    run(["python3", "examples/validate_scenarios.py"])
-    print("\n✅ quality-gate passed")
+    python = sys.executable
+    run([python, "scripts/project_status.py", "--check"])
+    run([python, "-m", "unittest", "discover", "-s", "tests", "-v"])
+    run([python, "examples/validate_scenarios.py"])
+    run([python, "scripts/policy_check.py"])
+    run([python, "scripts/north_star_report.py"])
+    run([python, "scripts/run_replay_benchmark.py", "--check"])
+    run([python, "scripts/check_runtime_qualification.py"])
+    print("\n✅ quality-gate passed", flush=True)
     return 0
 
 

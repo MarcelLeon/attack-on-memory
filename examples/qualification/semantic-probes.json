@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "probes": [
+    {
+      "anchor": "Restore the database from the verified backup.",
+      "paraphrase": "Recover the database using the validated snapshot.",
+      "unrelated": "Schedule the product launch announcement."
+    },
+    {
+      "anchor": "Only disclose secrets for the approved incident purpose.",
+      "paraphrase": "Sensitive data may be revealed solely for the authorized incident response.",
+      "unrelated": "The cafeteria serves noodles at noon."
+    },
+    {
+      "anchor": "从经过校验的备份恢复数据库。",
+      "paraphrase": "使用已验证的快照还原数据库。",
+      "unrelated": "明天下午发布市场活动海报。"
+    },
+    {
+      "anchor": "隔离受到污染的记忆及其派生内容。",
+      "paraphrase": "将中毒记忆与由它生成的信息一并移出检索。",
+      "unrelated": "办公室的咖啡机需要加水。"
+    }
+  ]
+}

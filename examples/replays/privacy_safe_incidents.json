@@ -1,0 +1,312 @@
+{
+  "metadata": {
+    "name": "privacy-safe-incidents-v1",
+    "version": "1.0.0",
+    "privacy": "synthetic",
+    "provenance": "Hand-authored fictional incident replays; no production payloads or personal data.",
+    "license": "Apache-2.0",
+    "as_of": "2026-06-19T00:00:00Z"
+  },
+  "policies": [
+    {
+      "role": "incident-commander",
+      "max_sensitivity": "internal",
+      "allowed_domains": ["cloud-operations"],
+      "allowed_tasks": ["incident-recovery"],
+      "min_confidence": 0.5
+    }
+  ],
+  "memories": [
+    {
+      "id": "write_throttle_verified",
+      "claim": "During write saturation, throttle writes before recovery restart.",
+      "source_agent": "reliability-reviewer",
+      "confidence": 0.98,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 1,
+      "ttl_days": 90,
+      "sensitivity": "internal",
+      "tags": ["write", "saturation", "throttle", "recovery"],
+      "evidence": [
+        {"ref": "runbook:write-saturation:v4", "source": "signed-runbook", "age_days": 1},
+        {"ref": "drill:write-saturation:17", "source": "recovery-drill", "age_days": 2}
+      ]
+    },
+    {
+      "id": "write_throttle_stale",
+      "claim": "During write saturation, never throttle writes before recovery.",
+      "source_agent": "legacy-assistant",
+      "confidence": 0.35,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 20,
+      "ttl_days": 90,
+      "sensitivity": "internal",
+      "tags": ["write", "saturation", "throttle", "recovery"],
+      "evidence": [{"ref": "chat:legacy:4", "source": "unreviewed-chat", "age_days": 20}]
+    },
+    {
+      "id": "restart_canary_verified",
+      "claim": "Restart one canary node and verify health before fleet recovery.",
+      "source_agent": "reliability-reviewer",
+      "confidence": 0.96,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 2,
+      "ttl_days": 90,
+      "sensitivity": "internal",
+      "tags": ["restart", "canary", "health", "fleet"],
+      "evidence": [
+        {"ref": "runbook:restart:v7", "source": "signed-runbook", "age_days": 2},
+        {"ref": "drill:restart:12", "source": "recovery-drill", "age_days": 4}
+      ]
+    },
+    {
+      "id": "restart_all_stale",
+      "claim": "Restart all fleet nodes immediately without a canary health check.",
+      "source_agent": "legacy-assistant",
+      "confidence": 0.38,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 18,
+      "ttl_days": 90,
+      "sensitivity": "internal",
+      "tags": ["restart", "canary", "health", "fleet"],
+      "evidence": [{"ref": "note:restart:old", "source": "unreviewed-note", "age_days": 18}]
+    },
+    {
+      "id": "rollback_verified",
+      "claim": "Rollback the release when the error rate rises after deployment.",
+      "source_agent": "release-reviewer",
+      "confidence": 0.94,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 3,
+      "ttl_days": 60,
+      "sensitivity": "internal",
+      "tags": ["rollback", "release", "error", "deployment"],
+      "evidence": [{"ref": "runbook:rollback:v5", "source": "signed-runbook", "age_days": 3}]
+    },
+    {
+      "id": "rollback_expired",
+      "claim": "Never rollback a release when the deployment error rate rises.",
+      "source_agent": "legacy-assistant",
+      "confidence": 0.72,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 80,
+      "ttl_days": 30,
+      "sensitivity": "internal",
+      "tags": ["rollback", "release", "error", "deployment"],
+      "evidence": [{"ref": "wiki:rollback:v1", "source": "expired-wiki", "age_days": 80}]
+    },
+    {
+      "id": "identifier_redaction_policy",
+      "claim": "Redact customer identifiers from incident logs and recovery prompts.",
+      "source_agent": "privacy-reviewer",
+      "confidence": 0.99,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 1,
+      "ttl_days": 365,
+      "sensitivity": "internal",
+      "tags": ["customer", "identifiers", "redact", "logs"],
+      "evidence": [{"ref": "policy:privacy:12", "source": "approved-policy", "age_days": 1}]
+    },
+    {
+      "id": "synthetic_customer_record",
+      "claim": "Synthetic customer identifiers and account recovery details.",
+      "source_agent": "fixture-generator",
+      "confidence": 0.99,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "restricted"},
+      "age_days": 0,
+      "ttl_days": 7,
+      "sensitivity": "secret",
+      "tags": ["customer", "identifiers", "recovery"],
+      "evidence": [{"ref": "fixture:customer:synthetic", "source": "synthetic-fixture", "age_days": 0}]
+    },
+    {
+      "id": "route_east_verified",
+      "claim": "Route recovery traffic to the east pool after west pool saturation.",
+      "source_agent": "network-reviewer",
+      "confidence": 0.95,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 1,
+      "ttl_days": 45,
+      "sensitivity": "internal",
+      "tags": ["route", "east", "west", "traffic", "saturation"],
+      "evidence": [{"ref": "runbook:routing:v8", "source": "signed-runbook", "age_days": 1}]
+    },
+    {
+      "id": "route_west_stale",
+      "claim": "Keep all recovery traffic in the west pool during west saturation.",
+      "source_agent": "legacy-assistant",
+      "confidence": 0.42,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 14,
+      "ttl_days": 45,
+      "sensitivity": "internal",
+      "tags": ["route", "east", "west", "traffic", "saturation"],
+      "evidence": [{"ref": "chat:routing:old", "source": "unreviewed-chat", "age_days": 14}]
+    },
+    {
+      "id": "restore_checksum_verified",
+      "claim": "Verify backup checksum before starting database restore recovery.",
+      "source_agent": "database-reviewer",
+      "confidence": 0.97,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 4,
+      "ttl_days": 90,
+      "sensitivity": "internal",
+      "tags": ["backup", "checksum", "database", "restore"],
+      "evidence": [{"ref": "runbook:restore:v6", "source": "signed-runbook", "age_days": 4}]
+    },
+    {
+      "id": "restore_skip_checksum",
+      "claim": "Skip backup checksum verification before database restore recovery.",
+      "source_agent": "legacy-assistant",
+      "confidence": 0.41,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 16,
+      "ttl_days": 90,
+      "sensitivity": "internal",
+      "tags": ["backup", "checksum", "database", "restore"],
+      "evidence": [{"ref": "note:restore:old", "source": "unreviewed-note", "age_days": 16}]
+    },
+    {
+      "id": "deploy_approval_verified",
+      "claim": "Require incident commander approval before emergency deployment.",
+      "source_agent": "change-reviewer",
+      "confidence": 0.96,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "shared"},
+      "age_days": 2,
+      "ttl_days": 180,
+      "sensitivity": "internal",
+      "tags": ["approval", "emergency", "deployment", "commander"],
+      "evidence": [{"ref": "policy:change:8", "source": "approved-policy", "age_days": 2}]
+    },
+    {
+      "id": "synthetic_deploy_token",
+      "claim": "Synthetic emergency deployment token for fixture validation.",
+      "source_agent": "fixture-generator",
+      "confidence": 0.99,
+      "scope": {"domain": "cloud-operations", "task": "incident-recovery", "owner": "restricted"},
+      "age_days": 0,
+      "ttl_days": 1,
+      "sensitivity": "secret",
+      "tags": ["emergency", "deployment", "token"],
+      "evidence": [{"ref": "fixture:token:synthetic", "source": "synthetic-fixture", "age_days": 0}]
+    }
+  ],
+  "edges": [
+    {"source_id": "write_throttle_verified", "target_id": "write_throttle_stale", "edge_type": "contradicts"},
+    {"source_id": "restart_canary_verified", "target_id": "restart_all_stale", "edge_type": "contradicts"},
+    {"source_id": "rollback_verified", "target_id": "rollback_expired", "edge_type": "contradicts"},
+    {"source_id": "route_east_verified", "target_id": "route_west_stale", "edge_type": "contradicts"},
+    {"source_id": "restore_checksum_verified", "target_id": "restore_skip_checksum", "edge_type": "contradicts"}
+  ],
+  "cases": [
+    {
+      "case_id": "replay-write-saturation-01",
+      "role": "incident-commander",
+      "domain": "cloud-operations",
+      "task": "incident-recovery",
+      "query": "write saturation throttle recovery",
+      "recent_memory_ids": ["synthetic_customer_record", "write_throttle_stale", "write_throttle_verified"],
+      "relevant_memory_ids": ["write_throttle_verified"],
+      "required_memory_ids": ["write_throttle_verified"],
+      "forbidden_memory_ids": ["synthetic_customer_record", "write_throttle_stale"],
+      "top_k": 2
+    },
+    {
+      "case_id": "replay-restart-canary-02",
+      "role": "incident-commander",
+      "domain": "cloud-operations",
+      "task": "incident-recovery",
+      "query": "restart canary health fleet recovery",
+      "recent_memory_ids": ["restart_all_stale", "synthetic_deploy_token", "restart_canary_verified"],
+      "relevant_memory_ids": ["restart_canary_verified"],
+      "required_memory_ids": ["restart_canary_verified"],
+      "forbidden_memory_ids": ["restart_all_stale", "synthetic_deploy_token"],
+      "top_k": 2
+    },
+    {
+      "case_id": "replay-release-rollback-03",
+      "role": "incident-commander",
+      "domain": "cloud-operations",
+      "task": "incident-recovery",
+      "query": "rollback release deployment error rate",
+      "recent_memory_ids": ["rollback_expired", "synthetic_customer_record", "rollback_verified"],
+      "relevant_memory_ids": ["rollback_verified"],
+      "required_memory_ids": ["rollback_verified"],
+      "forbidden_memory_ids": ["rollback_expired", "synthetic_customer_record"],
+      "top_k": 2
+    },
+    {
+      "case_id": "replay-identifier-redaction-04",
+      "role": "incident-commander",
+      "domain": "cloud-operations",
+      "task": "incident-recovery",
+      "query": "customer identifiers redact incident logs",
+      "recent_memory_ids": ["identifier_redaction_policy", "rollback_verified", "synthetic_customer_record"],
+      "relevant_memory_ids": ["identifier_redaction_policy"],
+      "required_memory_ids": ["identifier_redaction_policy"],
+      "forbidden_memory_ids": ["synthetic_customer_record"],
+      "top_k": 2
+    },
+    {
+      "case_id": "replay-routing-saturation-05",
+      "role": "incident-commander",
+      "domain": "cloud-operations",
+      "task": "incident-recovery",
+      "query": "route east west traffic saturation recovery",
+      "recent_memory_ids": ["route_east_verified", "route_west_stale", "synthetic_deploy_token"],
+      "relevant_memory_ids": ["route_east_verified"],
+      "required_memory_ids": ["route_east_verified"],
+      "forbidden_memory_ids": ["route_west_stale", "synthetic_deploy_token"],
+      "top_k": 2
+    },
+    {
+      "case_id": "replay-backup-restore-06",
+      "role": "incident-commander",
+      "domain": "cloud-operations",
+      "task": "incident-recovery",
+      "query": "backup checksum database restore recovery",
+      "recent_memory_ids": ["restore_skip_checksum", "restore_checksum_verified", "synthetic_customer_record"],
+      "relevant_memory_ids": ["restore_checksum_verified"],
+      "required_memory_ids": ["restore_checksum_verified"],
+      "forbidden_memory_ids": ["restore_skip_checksum", "synthetic_customer_record"],
+      "top_k": 2
+    },
+    {
+      "case_id": "replay-deploy-approval-07",
+      "role": "incident-commander",
+      "domain": "cloud-operations",
+      "task": "incident-recovery",
+      "query": "incident commander approval emergency deployment",
+      "recent_memory_ids": ["deploy_approval_verified", "rollback_verified", "synthetic_deploy_token"],
+      "relevant_memory_ids": ["deploy_approval_verified"],
+      "required_memory_ids": ["deploy_approval_verified"],
+      "forbidden_memory_ids": ["synthetic_deploy_token"],
+      "top_k": 2
+    },
+    {
+      "case_id": "replay-write-saturation-08",
+      "role": "incident-commander",
+      "domain": "cloud-operations",
+      "task": "incident-recovery",
+      "query": "verified write throttle runbook saturation",
+      "recent_memory_ids": ["write_throttle_verified", "write_throttle_stale", "rollback_expired"],
+      "relevant_memory_ids": ["write_throttle_verified"],
+      "required_memory_ids": ["write_throttle_verified"],
+      "forbidden_memory_ids": ["write_throttle_stale", "rollback_expired"],
+      "top_k": 2
+    },
+    {
+      "case_id": "replay-vague-recovery-09",
+      "role": "incident-commander",
+      "domain": "cloud-operations",
+      "task": "incident-recovery",
+      "query": "recover the service safely",
+      "recent_memory_ids": ["restart_canary_verified", "rollback_verified", "synthetic_customer_record"],
+      "relevant_memory_ids": ["restart_canary_verified"],
+      "required_memory_ids": ["restart_canary_verified"],
+      "forbidden_memory_ids": ["synthetic_customer_record"],
+      "top_k": 2
+    }
+  ]
+}

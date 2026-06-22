@@ -151,6 +151,15 @@ def _validate_variant_policies(
                 errors.append(f"duplicate policy role '{role}' in {ctx}")
             roles.add(role)
 
+        _require_non_empty_str(policy, "policy_id", errors, ctx=pctx, required=False)
+        policy_version = policy.get("version")
+        if policy_version is not None and (
+            not isinstance(policy_version, int)
+            or isinstance(policy_version, bool)
+            or policy_version < 1
+        ):
+            errors.append(f"{pctx}.version must be an integer >= 1")
+
         sensitivity = _require_non_empty_str(policy, "max_sensitivity", errors, ctx=pctx)
         if sensitivity and sensitivity not in ALLOWED_SENSITIVITY:
             errors.append(f"{pctx}.max_sensitivity must be one of {sorted(ALLOWED_SENSITIVITY)}")
@@ -161,14 +170,21 @@ def _validate_variant_policies(
         elif min_conf < 0 or min_conf > 1:
             errors.append(f"{pctx}.min_confidence must be between 0 and 1")
 
-        for key in ("allowed_domains", "allowed_tasks"):
+        for key in ("allowed_domains", "allowed_tasks", "allowed_purposes"):
             value = policy.get(key)
-            if not isinstance(value, list) or not value:
+            if key == "allowed_purposes" and value is None:
+                continue
+            if not isinstance(value, list) or (
+                key != "allowed_purposes" and not value
+            ):
                 errors.append(f"{pctx}.{key} must be a non-empty list")
                 continue
             for item in value:
                 if not isinstance(item, str) or not item.strip():
                     errors.append(f"{pctx}.{key} contains invalid value '{item}'")
+        require_purpose = policy.get("require_explicit_purpose")
+        if require_purpose is not None and not isinstance(require_purpose, bool):
+            errors.append(f"{pctx}.require_explicit_purpose must be a boolean")
 
 
 def _validate_variant_edges(
@@ -310,6 +326,7 @@ def _validate_variant_events(
         _require_non_empty_str(event, "domain", errors, ctx=ectx)
         _require_non_empty_str(event, "task", errors, ctx=ectx)
         _require_non_empty_str(event, "objective", errors, ctx=ectx)
+        _require_non_empty_str(event, "purpose", errors, ctx=ectx, required=False)
 
         _require_number(event, "top_k", errors, ctx=ectx, minimum=1)
         _require_number(event, "graph_hops", errors, ctx=ectx, minimum=0)
@@ -342,7 +359,16 @@ def _validate_variant_events(
                     elif memory_ids and value not in memory_ids:
                         errors.append(f"{ectx}.expected.{key} id '{value}' not found in memories")
 
-            for count_key in ("min_memories", "max_memories", "min_redacted", "max_redacted"):
+            for count_key in (
+                "min_memories",
+                "max_memories",
+                "min_redacted",
+                "max_redacted",
+                "min_inherited",
+                "max_inherited",
+                "min_contradictions",
+                "max_contradictions",
+            ):
                 count_value = expected.get(count_key)
                 if count_value is not None:
                     _require_number(expected, count_key, errors, ctx=f"{ectx}.expected", minimum=0)
@@ -393,7 +419,12 @@ def _require_non_empty_str(
     errors: list[str],
     *,
     ctx: str,
+    required: bool = True,
 ) -> str | None:
+    if key not in mapping:
+        if required:
+            errors.append(f"{ctx}.{key} must be a non-empty string")
+        return None
     value = mapping.get(key)
     if not isinstance(value, str) or not value.strip():
         errors.append(f"{ctx}.{key} must be a non-empty string")

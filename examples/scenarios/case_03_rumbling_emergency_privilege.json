@@ -10,6 +10,8 @@
       "policies": [
         {
           "role": "commander_normal",
+          "policy_id": "case03-commander-normal",
+          "version": 1,
           "max_sensitivity": "restricted",
           "allowed_domains": ["global-defense"],
           "allowed_tasks": ["catastrophic-response"],
@@ -17,6 +19,8 @@
         },
         {
           "role": "commander_emergency",
+          "policy_id": "case03-commander-emergency",
+          "version": 1,
           "max_sensitivity": "secret",
           "allowed_domains": ["global-defense"],
           "allowed_tasks": ["catastrophic-response"],

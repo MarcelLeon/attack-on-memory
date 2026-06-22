@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from enum import Enum
@@ -52,6 +53,24 @@ class BranchStatus(str, Enum):
     MERGED = "merged"
     REJECTED = "rejected"
     ARCHIVED = "archived"
+
+
+class ConflictOutcome(str, Enum):
+    """Auditable outcome of resolving a contradictory memory group."""
+
+    FLAGGED = "flagged"
+    SELECTED = "selected"
+    QUARANTINED = "quarantined"
+
+
+class MemoryLifecycleState(str, Enum):
+    """Retrieval and retention state for a memory atom."""
+
+    ACTIVE = "active"
+    QUARANTINED = "quarantined"
+    SUPERSEDED = "superseded"
+    EXPIRED = "expired"
+    FORGOTTEN = "forgotten"
 
 
 @dataclass(frozen=True)
@@ -135,6 +154,51 @@ class MemoryAtom:
         _validate_aware_datetime(check_time, "at")
         return check_time < self.expires_at
 
+    @property
+    def memory_key(self) -> str:
+        """Stable semantic slot used for branch overrides and inheritance."""
+        candidate = self.metadata.get("memory_key")
+        if isinstance(candidate, str) and candidate.strip():
+            return candidate.strip()
+        return self.id
+
+    @property
+    def supersedes(self) -> tuple[str, ...]:
+        """Explicit memory ids or keys superseded by this atom in descendant branches."""
+        raw_value = self.metadata.get("supersedes", ())
+        if isinstance(raw_value, str):
+            values = (raw_value,)
+        elif isinstance(raw_value, (list, tuple, set, frozenset)):
+            values = tuple(str(item).strip() for item in raw_value)
+        else:
+            values = ()
+        return tuple(value for value in values if value)
+
+
+@dataclass(frozen=True)
+class MemoryLifecycleRecord:
+    """Content-minimized immutable audit event for a lifecycle transition."""
+
+    atom_id: str
+    state: MemoryLifecycleState
+    reason_code: str
+    actor: str
+    changed_at: datetime
+    version: int
+
+    def __post_init__(self) -> None:
+        if not self.atom_id.strip():
+            raise ValueError("MemoryLifecycleRecord.atom_id cannot be empty")
+        if not self.actor.strip():
+            raise ValueError("MemoryLifecycleRecord.actor cannot be empty")
+        if not re.fullmatch(r"[a-z0-9][a-z0-9_.-]{0,127}", self.reason_code):
+            raise ValueError(
+                "MemoryLifecycleRecord.reason_code must be a lowercase audit code"
+            )
+        if self.version <= 0:
+            raise ValueError("MemoryLifecycleRecord.version must be > 0")
+        _validate_aware_datetime(self.changed_at, "MemoryLifecycleRecord.changed_at")
+
 
 @dataclass(frozen=True)
 class MemoryEdge:
@@ -181,6 +245,7 @@ class TaskIntent:
     domain: str
     task: str
     query: str
+    purpose: str | None = None
     branch_id: str = "main"
     as_of: datetime = field(default_factory=utc_now)
 
@@ -198,6 +263,13 @@ class TaskIntent:
             if not value.strip():
                 raise ValueError(f"TaskIntent.{field_name} cannot be empty")
         _validate_aware_datetime(self.as_of, "TaskIntent.as_of")
+        if self.purpose is not None and not self.purpose.strip():
+            raise ValueError("TaskIntent.purpose cannot be empty when provided")
+
+    @property
+    def effective_purpose(self) -> str:
+        """Explicit purpose, or task for policies that allow legacy fallback."""
+        return self.purpose or self.task
 
 
 @dataclass(frozen=True)
@@ -226,6 +298,17 @@ class RetrievedMemory:
     atom: MemoryAtom
     score: float
     reason: str
+    conflicting_ids: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class ConflictDecision:
+    """Resolution record retained in the runtime context packet."""
+
+    memory_ids: tuple[str, ...]
+    outcome: ConflictOutcome
+    selected_id: str | None
+    rationale: str
 
 
 @dataclass(frozen=True)
